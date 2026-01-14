@@ -30,10 +30,12 @@ const BackgroundIcons = () => {
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {icons.map((item, index) => {
         const { Icon, top, left, right, delay, size, rotate } = item;
+        // Hide every other icon on mobile (odd indices hidden)
+        const mobileHidden = index % 2 === 1 ? "hidden md:block" : "";
         return (
           <div
             key={index}
-            className="absolute animate-float-slow"
+            className={`absolute animate-float-slow ${mobileHidden}`}
             style={{
               top,
               left,

@@ -1,16 +1,10 @@
 import mascot from "@/assets/octoplo-mascot.png";
-
 const Hero = () => {
-  return (
-    <section className="pt-8 pb-16 md:pt-12 md:pb-24 px-6">
+  return <section className="pt-8 pb-16 md:pt-12 md:pb-24 px-6 py-[20px]">
       <div className="max-w-4xl mx-auto text-center">
         {/* Mascot */}
         <div className="mb-4 md:mb-6">
-          <img
-            src={mascot}
-            alt="Octoplo mascot - a friendly orange octopus holding a globe and phone"
-            className="w-48 h-48 md:w-64 md:h-64 mx-auto animate-float"
-          />
+          <img src={mascot} alt="Octoplo mascot - a friendly orange octopus holding a globe and phone" className="w-48 h-48 md:w-64 md:h-64 mx-auto animate-float" />
         </div>
 
         {/* Headline */}
@@ -23,8 +17,6 @@ const Hero = () => {
           One shared place to plan, decide, and remember your trip — with or without AI.
         </p>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;

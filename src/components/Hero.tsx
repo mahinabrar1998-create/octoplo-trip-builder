@@ -5,7 +5,7 @@ const Hero = () => {
     <section className="pt-8 pb-16 md:pt-12 md:pb-24 px-6">
       <div className="max-w-4xl mx-auto text-center">
         {/* Mascot */}
-        <div className="mb-8 md:mb-12">
+        <div className="mb-4 md:mb-6">
           <img
             src={mascot}
             alt="Octoplo mascot - a friendly orange octopus holding a globe and phone"

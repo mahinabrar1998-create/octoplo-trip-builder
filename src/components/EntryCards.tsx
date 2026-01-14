@@ -55,7 +55,7 @@ const EntryCards = () => {
               className={`w-full rounded-xl font-medium transition-colors ${
                 scratchClicked
                   ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary hover:text-primary-foreground active:text-primary-foreground"
-                  : "hover:bg-primary/10 active:bg-primary/10 hover:text-foreground"
+                  : "hover:bg-primary/20 hover:border-primary/50 active:bg-primary active:text-primary-foreground"
               }`}
               onPointerDown={() => setScratchClicked(true)}
               onClick={() => setScratchClicked(true)}

@@ -50,7 +50,7 @@ const EntryCards = () => {
             <Button 
               variant="outline" 
               size="lg" 
-              className={`w-full rounded-xl font-medium ${scratchClicked ? "bg-orange-500 text-white border-orange-500 hover:bg-orange-600" : ""}`}
+              className={`w-full rounded-xl font-medium ${scratchClicked ? "!bg-orange-600 !text-white !border-orange-600 hover:!bg-orange-700" : ""}`}
               onClick={() => setScratchClicked(true)}
             >
               Start from scratch

@@ -1,9 +1,7 @@
 import { Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 const EntryCards = () => {
-  return (
-    <section id="how-it-works" className="py-12 md:py-16 px-6">
+  return <section id="how-it-works" className="py-12 px-6 md:py-[40px]">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-6">
           {/* Primary Card - AI Generated */}
@@ -22,10 +20,7 @@ const EntryCards = () => {
               Answer a few questions and get two complete trip plans — optimized for your budget, pace, and group.
             </p>
 
-            <Button 
-              size="lg" 
-              className="w-full rounded-xl font-medium shadow-soft"
-            >
+            <Button size="lg" className="w-full rounded-xl font-medium shadow-soft">
               Generate my trip
             </Button>
 
@@ -49,11 +44,7 @@ const EntryCards = () => {
               Create your itinerary time-block by time-block. Octoplo suggests activities, costs, and backups as you go.
             </p>
 
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="w-full rounded-xl font-medium"
-            >
+            <Button variant="outline" size="lg" className="w-full rounded-xl font-medium">
               Start from scratch
             </Button>
 
@@ -63,8 +54,6 @@ const EntryCards = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default EntryCards;

@@ -30,7 +30,7 @@ const BackgroundIcons = () => {
           >
             <Icon
               size={size}
-              className="text-primary/10"
+              className="text-primary/60"
               strokeWidth={1.5}
             />
           </div>

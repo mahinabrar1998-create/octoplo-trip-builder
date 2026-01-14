@@ -48,9 +48,15 @@ const EntryCards = () => {
             </p>
 
             <Button 
-              variant={scratchClicked ? "default" : "outline"}
-              size="lg" 
-              className="w-full rounded-xl font-medium"
+              variant="outline"
+              size="lg"
+              type="button"
+              aria-pressed={scratchClicked}
+              className={`w-full rounded-xl font-medium transition-colors ${
+                scratchClicked
+                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 active:bg-primary/90 hover:text-primary-foreground"
+                  : "hover:bg-primary/10 active:bg-primary/10 hover:text-foreground"
+              }`}
               onClick={() => setScratchClicked(true)}
             >
               Start from scratch

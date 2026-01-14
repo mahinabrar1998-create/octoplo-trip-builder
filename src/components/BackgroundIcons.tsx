@@ -15,7 +15,7 @@ const icons = [
   { Icon: Camera, top: "50%", left: "50%", delay: "4.5s", size: 24 },
   { Icon: Plane, top: "70%", left: "48%", delay: "1.5s", size: 26, rotate: true },
   // Center-right - Ship hidden on mobile to avoid mascot overlap
-  { Icon: Ship, top: "20%", left: "65%", delay: "3s", size: 24, hideOnMobile: true },
+  { Icon: Ship, top: "20%", right: "15%", delay: "3s", size: 24 },
   { Icon: Compass, top: "60%", left: "70%", delay: "0s", size: 22 },
   { Icon: Luggage, top: "85%", left: "72%", delay: "2.5s", size: 26 },
   // Right side

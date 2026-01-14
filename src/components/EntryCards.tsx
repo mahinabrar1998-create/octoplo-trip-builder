@@ -48,9 +48,9 @@ const EntryCards = () => {
             </p>
 
             <Button 
-              variant="outline" 
+              variant={scratchClicked ? "default" : "outline"}
               size="lg" 
-              className={`w-full rounded-xl font-medium ${scratchClicked ? "!bg-orange-600 !text-white !border-orange-600 hover:!bg-orange-700" : ""}`}
+              className="w-full rounded-xl font-medium"
               onClick={() => setScratchClicked(true)}
             >
               Start from scratch

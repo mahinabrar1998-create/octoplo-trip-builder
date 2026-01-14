@@ -1,0 +1,70 @@
+import { Sparkles, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const EntryCards = () => {
+  return (
+    <section id="how-it-works" className="py-12 md:py-16 px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Primary Card - AI Generated */}
+          <div className="relative bg-card rounded-2xl p-8 shadow-soft-lg border border-border/50 md:scale-[1.02] hover:shadow-lg transition-shadow">
+            {/* Accent badge */}
+            <div className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground text-xs font-medium px-3 py-1.5 rounded-full mb-6">
+              <Sparkles className="w-3.5 h-3.5" />
+              Recommended
+            </div>
+
+            <h3 className="text-xl font-semibold text-foreground mb-3">
+              Let Octoplo build it for you
+            </h3>
+            
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              Answer a few questions and get two complete trip plans — optimized for your budget, pace, and group.
+            </p>
+
+            <Button 
+              size="lg" 
+              className="w-full rounded-xl font-medium shadow-soft"
+            >
+              Generate my trip
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              Takes under a minute
+            </p>
+          </div>
+
+          {/* Secondary Card - Manual */}
+          <div className="bg-card rounded-2xl p-8 shadow-card border border-border/50 hover:shadow-soft transition-shadow">
+            <div className="inline-flex items-center gap-1.5 text-muted-foreground text-xs font-medium px-3 py-1.5 rounded-full mb-6 border border-border">
+              <Pencil className="w-3.5 h-3.5" />
+              DIY
+            </div>
+
+            <h3 className="text-xl font-semibold text-foreground mb-3">
+              Build it myself
+            </h3>
+            
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              Create your itinerary time-block by time-block. Octoplo suggests activities, costs, and backups as you go.
+            </p>
+
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-full rounded-xl font-medium"
+            >
+              Start from scratch
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              AI suggestions are optional
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default EntryCards;

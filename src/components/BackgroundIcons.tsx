@@ -14,8 +14,8 @@ const icons = [
   { Icon: MapPin, top: "25%", left: "45%", delay: "2s", size: 28 },
   { Icon: Camera, top: "50%", left: "50%", delay: "4.5s", size: 24 },
   { Icon: Plane, top: "70%", left: "48%", delay: "1.5s", size: 26, rotate: true },
-  // Center-right
-  { Icon: Ship, top: "20%", left: "65%", delay: "3s", size: 24 },
+  // Center-right - Ship hidden on mobile to avoid mascot overlap
+  { Icon: Ship, top: "20%", left: "65%", delay: "3s", size: 24, hideOnMobile: true },
   { Icon: Compass, top: "60%", left: "70%", delay: "0s", size: 22 },
   { Icon: Luggage, top: "85%", left: "72%", delay: "2.5s", size: 26 },
   // Right side
@@ -29,9 +29,9 @@ const BackgroundIcons = () => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {icons.map((item, index) => {
-        const { Icon, top, left, right, delay, size, rotate } = item;
-        // Hide every other icon on mobile (odd indices hidden)
-        const mobileHidden = index % 2 === 1 ? "hidden md:block" : "";
+        const { Icon, top, left, right, delay, size, rotate, hideOnMobile } = item as any;
+        // Hide every other icon on mobile (odd indices hidden), or if explicitly marked
+        const mobileHidden = hideOnMobile ? "hidden md:block" : (index % 2 === 1 ? "hidden md:block" : "");
         return (
           <div
             key={index}

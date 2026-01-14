@@ -54,9 +54,10 @@ const EntryCards = () => {
               aria-pressed={scratchClicked}
               className={`w-full rounded-xl font-medium transition-colors ${
                 scratchClicked
-                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 active:bg-primary/90 hover:text-primary-foreground"
+                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary hover:text-primary-foreground active:text-primary-foreground"
                   : "hover:bg-primary/10 active:bg-primary/10 hover:text-foreground"
               }`}
+              onPointerDown={() => setScratchClicked(true)}
               onClick={() => setScratchClicked(true)}
             >
               Start from scratch

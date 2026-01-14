@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 const EntryCards = () => {
+  const [scratchClicked, setScratchClicked] = useState(false);
   return <section id="how-it-works" className="py-12 px-6 md:py-[8px]">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-6">
@@ -44,7 +47,12 @@ const EntryCards = () => {
               Create your itinerary time-block by time-block. Octoplo suggests activities, costs, and backups as you go.
             </p>
 
-            <Button variant="outline" size="lg" className="w-full rounded-xl font-medium">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className={`w-full rounded-xl font-medium ${scratchClicked ? "bg-orange-500 text-white border-orange-500 hover:bg-orange-600" : ""}`}
+              onClick={() => setScratchClicked(true)}
+            >
               Start from scratch
             </Button>
 

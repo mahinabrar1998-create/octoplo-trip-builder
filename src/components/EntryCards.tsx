@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const EntryCards = () => {
+  const navigate = useNavigate();
   const [scratchClicked, setScratchClicked] = useState(false);
   return <section id="how-it-works" className="py-12 px-6 md:py-[8px]">
       <div className="max-w-4xl mx-auto">
@@ -23,7 +25,11 @@ const EntryCards = () => {
               Answer a few questions and get two complete trip plans — optimized for your budget, pace, and group.
             </p>
 
-            <Button size="lg" className="w-full rounded-xl font-medium shadow-soft">
+            <Button 
+              size="lg" 
+              className="w-full rounded-xl font-medium shadow-soft"
+              onClick={() => navigate("/generate")}
+            >
               Generate my trip
             </Button>
 

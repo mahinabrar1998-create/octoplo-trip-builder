@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import DestinationAutocomplete from "@/components/DestinationAutocomplete";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -143,13 +143,11 @@ const GenerateTrip = () => {
                 Enter a city, country, or region
               </p>
             </div>
-            <Input
-              placeholder="e.g., Tokyo, Japan"
+            <DestinationAutocomplete
               value={tripData.destination}
-              onChange={(e) =>
-                setTripData({ ...tripData, destination: e.target.value })
+              onChange={(value) =>
+                setTripData({ ...tripData, destination: value })
               }
-              className="text-lg py-6 text-center rounded-xl border-2 focus:border-primary"
             />
           </div>
         );

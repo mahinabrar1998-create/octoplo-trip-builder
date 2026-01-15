@@ -1,0 +1,4 @@
+project_id = "oztpfiuahuzehwtvspfz"
+
+[functions.generate-trip]
+verify_jwt = false

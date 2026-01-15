@@ -81,9 +81,16 @@ const GenerateTrip = () => {
     if (currentStep < 6) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - generate trip
-      console.log("Trip data:", tripData);
-      // TODO: Navigate to results page or show loading
+      // Final step - navigate to results with trip data
+      navigate("/results", {
+        state: {
+          tripData: {
+            ...tripData,
+            startDate: tripData.startDate?.toISOString(),
+            endDate: tripData.endDate?.toISOString(),
+          },
+        },
+      });
     }
   };
 

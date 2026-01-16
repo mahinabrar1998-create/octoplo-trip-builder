@@ -18,7 +18,7 @@ import {
   MessageSquare,
   Check
 } from "lucide-react";
-import BackgroundIcons from "@/components/BackgroundIcons";
+import SoothingGradient from "@/components/SoothingGradient";
 
 type TripData = {
   destination: string;
@@ -381,7 +381,7 @@ const GenerateTrip = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <BackgroundIcons />
+      <SoothingGradient />
       
       {/* Header */}
       <header className="relative z-10 p-4 md:p-6">

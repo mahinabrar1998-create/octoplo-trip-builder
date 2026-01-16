@@ -6,7 +6,7 @@ import DestinationAutocomplete from "@/components/DestinationAutocomplete";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, addDays, differenceInDays } from "date-fns";
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -152,7 +152,12 @@ const GenerateTrip = () => {
           </div>
         );
 
-      case 2:
+      case 2: {
+        const maxTripDays = 14;
+        const tripDuration = tripData.startDate && tripData.endDate 
+          ? differenceInDays(tripData.endDate, tripData.startDate) + 1 
+          : 0;
+        
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">
@@ -160,7 +165,7 @@ const GenerateTrip = () => {
                 When are you traveling?
               </h2>
               <p className="text-muted-foreground">
-                Select your start and end dates
+                Select your start and end dates (max 2 weeks)
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -184,7 +189,7 @@ const GenerateTrip = () => {
                     mode="single"
                     selected={tripData.startDate}
                     onSelect={(date) =>
-                      setTripData({ ...tripData, startDate: date })
+                      setTripData({ ...tripData, startDate: date, endDate: undefined })
                     }
                     disabled={(date) => date < new Date()}
                     initialFocus
@@ -216,7 +221,8 @@ const GenerateTrip = () => {
                     }
                     disabled={(date) =>
                       date < new Date() ||
-                      (tripData.startDate ? date < tripData.startDate : false)
+                      (tripData.startDate ? date < tripData.startDate : false) ||
+                      (tripData.startDate ? date > addDays(tripData.startDate, maxTripDays - 1) : false)
                     }
                     initialFocus
                     className="pointer-events-auto"
@@ -224,8 +230,14 @@ const GenerateTrip = () => {
                 </PopoverContent>
               </Popover>
             </div>
+            {tripDuration > 0 && (
+              <p className="text-center text-sm text-muted-foreground">
+                {tripDuration} day{tripDuration > 1 ? "s" : ""} trip
+              </p>
+            )}
           </div>
         );
+      }
 
       case 3:
         return (

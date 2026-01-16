@@ -26,11 +26,11 @@ serve(async (req) => {
     const end = new Date(endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    const systemPrompt = `You are an expert travel planner. Create detailed, realistic trip itineraries with specific time blocks.
+    const systemPrompt = `You are an expert travel planner creating HIGHLY DETAILED trip itineraries. You must consider real-world factors like weather patterns, traffic conditions, transportation availability, and optimal timing.
 
 Your response must be valid JSON with this exact structure:
 {
-  "plan1": {
+  "plan": {
     "name": "string (creative name for this plan)",
     "theme": "string (e.g., 'Cultural Immersion' or 'Adventure & Nature')",
     "summary": "string (2-3 sentence overview)",
@@ -38,36 +38,48 @@ Your response must be valid JSON with this exact structure:
       {
         "dayNumber": 1,
         "date": "YYYY-MM-DD",
+        "weather": {
+          "condition": "sunny" | "partly-cloudy" | "cloudy" | "rainy" | "stormy" | "snowy" | "windy",
+          "highTemp": number (in Fahrenheit),
+          "lowTemp": number (in Fahrenheit),
+          "note": "string (brief weather advisory or tip)"
+        },
         "blocks": [
           {
             "time": "HH:MM",
             "endTime": "HH:MM",
             "title": "string",
-            "description": "string (1-2 sentences)",
-            "location": "string",
+            "description": "string (2-3 sentences with specific details)",
+            "location": "string (specific address or landmark)",
             "estimatedCost": "string (e.g., '$20-30' or 'Free')",
-            "category": "food" | "activity" | "transport" | "accommodation" | "free-time"
+            "category": "food" | "activity" | "transport" | "accommodation" | "free-time",
+            "transportNote": "string (how to get there, traffic considerations)",
+            "weatherConsideration": "string (optional - how weather affects this activity)"
           }
         ]
       }
     ],
     "estimatedTotalCost": "string",
-    "highlights": ["string", "string", "string"]
-  },
-  "plan2": { ... same structure ... }
+    "highlights": ["string", "string", "string"],
+    "packingTips": ["string", "string", "string"]
+  }
 }
 
-Guidelines:
-- Create TWO distinct plans with different themes/approaches
-- Plan 1 should be more structured and popular spots
-- Plan 2 should be more off-the-beaten-path or relaxed
-- Include 4-6 time blocks per day (morning, lunch, afternoon, evening, dinner, night)
-- Be specific with locations and times
+CRITICAL Guidelines for DETAILED planning:
+- Create ONE comprehensive, highly detailed plan
+- EVERY day MUST have 6-8 time blocks covering the ENTIRE day from morning (7-8 AM) to night (9-10 PM)
+- Time blocks should include: breakfast, morning activity, lunch, afternoon activity, dinner, evening activity/leisure
+- Consider realistic travel times between locations - account for traffic during rush hours
+- Include specific transport recommendations (walk 10 min, Uber ~$15, take Metro Line 2, etc.)
+- Base weather forecasts on typical seasonal patterns for the destination and dates
+- Adjust activities based on weather (indoor alternatives for rainy days, early starts for hot days)
+- Account for local opening hours, busy periods, and reservation requirements
+- Include specific restaurant names, attraction names, and neighborhoods
+- Factor in rest time and buffer between activities
 - Match the budget level and group size preferences
-- Incorporate the requested vibes/themes
-- Make it realistic and actionable`;
+- Make it realistic and actionable with specific venues and addresses`;
 
-    const userPrompt = `Create two ${days}-day trip plans for ${destination}.
+    const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.
 
 Trip Details:
 - Dates: ${startDate} to ${endDate} (${days} days)
@@ -76,7 +88,16 @@ Trip Details:
 - Preferred Vibes: ${vibe.join(', ')}
 ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
 
-Generate two complete, detailed itineraries with time blocks for each day.`;
+IMPORTANT Requirements:
+1. Each day MUST have 6-8 detailed time blocks from morning to night - NO GAPS in the schedule
+2. Include realistic weather forecasts based on seasonal patterns for ${destination}
+3. Consider traffic patterns (avoid scheduling across town during rush hour)
+4. Include specific transport instructions between each activity
+5. Account for opening hours and peak tourist times
+6. Name specific restaurants, attractions, and venues - not generic descriptions
+7. Include buffer time and realistic durations for each activity
+
+Generate a complete, detailed itinerary that someone could follow exactly.`;
 
     console.log("Calling Lovable AI Gateway...");
 
@@ -92,7 +113,7 @@ Generate two complete, detailed itineraries with time blocks for each day.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        temperature: 0.8,
+        temperature: 0.7,
       }),
     });
 
@@ -140,9 +161,9 @@ Generate two complete, detailed itineraries with time blocks for each day.`;
       throw new Error("Failed to parse trip plans from AI");
     }
 
-    console.log("Trip plans generated successfully");
+    console.log("Trip plan generated successfully");
 
-    return new Response(JSON.stringify({ plans }), {
+    return new Response(JSON.stringify({ plan: plans.plan }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 

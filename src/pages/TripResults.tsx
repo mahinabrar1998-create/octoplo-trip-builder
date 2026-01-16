@@ -23,6 +23,9 @@ import {
   CloudSun,
   Navigation,
   Thermometer,
+  Globe,
+  Check,
+  Copy,
 } from "lucide-react";
 import SoothingGradient from "@/components/SoothingGradient";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,7 +105,10 @@ const TripResults = () => {
   const [plan, setPlan] = useState<TripPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openDays, setOpenDays] = useState<number[]>([1]); // First day open by default
+  const [openDays, setOpenDays] = useState<number[]>([1]);
+  const [publishing, setPublishing] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const tripData = location.state?.tripData;
 
@@ -112,6 +118,64 @@ const TripResults = () => {
         ? prev.filter((d) => d !== dayNumber)
         : [...prev, dayNumber]
     );
+  };
+
+  const getHeroImageUrl = (destination: string) => {
+    // Using Unsplash for destination images
+    const encodedDest = encodeURIComponent(destination);
+    return `https://source.unsplash.com/1920x1080/?${encodedDest},travel,landmark`;
+  };
+
+  const handlePublish = async () => {
+    if (!plan || !tripData) return;
+
+    setPublishing(true);
+    try {
+      const heroImageUrl = getHeroImageUrl(tripData.destination);
+      
+      const { data, error: insertError } = await supabase
+        .from("published_trips" as never)
+        .insert({
+          destination: tripData.destination,
+          start_date: tripData.startDate,
+          end_date: tripData.endDate,
+          plan: plan as unknown,
+          hero_image_url: heroImageUrl,
+        } as never)
+        .select("id")
+        .single();
+
+      if (insertError) throw insertError;
+
+      const tripId = (data as { id: string }).id;
+      const url = `${window.location.origin}/trip/${tripId}`;
+      setPublishedUrl(url);
+      
+      toast({
+        title: "Trip Published! 🎉",
+        description: "Your trip website is ready to share.",
+      });
+    } catch (err) {
+      console.error("Error publishing trip:", err);
+      toast({
+        title: "Failed to publish",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    if (!publishedUrl) return;
+    await navigator.clipboard.writeText(publishedUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({
+      title: "Link copied!",
+      description: "Share it with your travel companions.",
+    });
   };
 
   useEffect(() => {
@@ -410,11 +474,54 @@ const TripResults = () => {
           })}
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-12 pb-8">
-          <Button size="lg" className="px-8 py-6 text-lg rounded-xl">
-            Choose This Plan
-          </Button>
+        {/* CTA - Publish Website */}
+        <div className="text-center mt-12 pb-8 space-y-4">
+          {!publishedUrl ? (
+            <Button
+              size="lg"
+              onClick={handlePublish}
+              disabled={publishing}
+              className="px-8 py-6 text-lg rounded-xl gap-3"
+            >
+              {publishing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Globe className="w-5 h-5" />
+                  Publish Website
+                </>
+              )}
+            </Button>
+          ) : (
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full">
+                <Check className="w-4 h-4" />
+                Website Published!
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={publishedUrl}
+                  className="bg-card border border-border rounded-lg px-4 py-2 text-sm w-80 text-muted-foreground"
+                />
+                <Button variant="outline" size="icon" onClick={copyToClipboard}>
+                  {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => window.open(publishedUrl, "_blank")}
+                className="gap-2"
+              >
+                <Globe className="w-4 h-4" />
+                View Website
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

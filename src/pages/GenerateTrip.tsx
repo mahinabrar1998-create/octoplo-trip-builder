@@ -16,7 +16,11 @@ import {
   Users, 
   Sparkles, 
   MessageSquare,
-  Check
+  Check,
+  User,
+  Heart,
+  Users2,
+  type LucideIcon
 } from "lucide-react";
 import SoothingGradient from "@/components/SoothingGradient";
 
@@ -48,11 +52,11 @@ const budgetOptions = [
   { id: "luxury", label: "Luxury", description: "5-star hotels, premium experiences" },
 ];
 
-const groupSizeOptions = [
-  { id: "solo", label: "Solo", icon: "🧳" },
-  { id: "couple", label: "Couple", icon: "💑" },
-  { id: "small", label: "Small Group (3-5)", icon: "👨‍👩‍👧" },
-  { id: "large", label: "Large Group (6+)", icon: "👥" },
+const groupSizeOptions: { id: string; label: string; Icon: LucideIcon }[] = [
+  { id: "solo", label: "Solo", Icon: User },
+  { id: "couple", label: "Couple", Icon: Heart },
+  { id: "small", label: "Small Group (3-5)", Icon: Users },
+  { id: "large", label: "Large Group (6+)", Icon: Users2 },
 ];
 
 const steps = [
@@ -288,25 +292,35 @@ const GenerateTrip = () => {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-              {groupSizeOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() =>
-                    setTripData({ ...tripData, groupSize: option.id })
-                  }
-                  className={cn(
-                    "p-6 rounded-xl border-2 text-center transition-all hover:border-primary",
-                    tripData.groupSize === option.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border"
-                  )}
-                >
-                  <div className="text-3xl mb-2">{option.icon}</div>
-                  <div className="font-semibold text-foreground">
-                    {option.label}
-                  </div>
-                </button>
-              ))}
+              {groupSizeOptions.map((option) => {
+                const IconComponent = option.Icon;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() =>
+                      setTripData({ ...tripData, groupSize: option.id })
+                    }
+                    className={cn(
+                      "p-6 rounded-xl border-2 text-center transition-all hover:border-primary group",
+                      tripData.groupSize === option.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center transition-colors",
+                      tripData.groupSize === option.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-primary group-hover:bg-primary/20"
+                    )}>
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <div className="font-semibold text-foreground">
+                      {option.label}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         );

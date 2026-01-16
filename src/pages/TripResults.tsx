@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Clock, MapPin, DollarSign, Sparkles, Loader2 } from "lucide-react";
-import BackgroundIcons from "@/components/BackgroundIcons";
+import SoothingGradient from "@/components/SoothingGradient";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -103,7 +103,7 @@ const TripResults = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background relative flex items-center justify-center">
-        <BackgroundIcons />
+        <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
@@ -128,7 +128,7 @@ const TripResults = () => {
   if (error || !plans) {
     return (
       <div className="min-h-screen bg-background relative flex items-center justify-center">
-        <BackgroundIcons />
+        <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
           <div className="text-6xl">😕</div>
           <div className="space-y-2">
@@ -152,7 +152,7 @@ const TripResults = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <BackgroundIcons />
+      <SoothingGradient />
 
       {/* Header */}
       <header className="relative z-10 p-4 md:p-6 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0">

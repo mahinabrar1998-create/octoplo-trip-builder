@@ -115,7 +115,7 @@ const PublishedTrip = () => {
 
       try {
         const { data, error: fetchError } = await supabase
-          .from("published_trips")
+          .from("published_trips" as never)
           .select("*")
           .eq("id", tripId)
           .single();
@@ -123,7 +123,7 @@ const PublishedTrip = () => {
         if (fetchError) throw fetchError;
         if (!data) throw new Error("Trip not found");
 
-        setTripData(data as PublishedTripData);
+        setTripData(data as unknown as PublishedTripData);
       } catch (err) {
         console.error("Error fetching trip:", err);
         setError("Trip not found or has been removed");

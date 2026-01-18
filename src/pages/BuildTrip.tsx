@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, addDays, differenceInDays } from "date-fns";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
   Plane,
   Hotel,
-  Calendar,
+  Calendar as CalendarIcon,
   Luggage,
   Plus,
   Sparkles,
@@ -48,7 +51,7 @@ import { supabase } from "@/integrations/supabase/client";
 const steps = [
   { id: 1, name: "Flights", icon: Plane },
   { id: 2, name: "Hotel", icon: Hotel },
-  { id: 3, name: "Days", icon: Calendar },
+  { id: 3, name: "Days", icon: CalendarIcon },
   { id: 4, name: "Packing", icon: Luggage },
 ];
 
@@ -59,8 +62,8 @@ const BuildTrip = () => {
   
   // Trip details
   const [destination, setDestination] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [tripName, setTripName] = useState("");
   
   // Trip data
@@ -87,20 +90,20 @@ const BuildTrip = () => {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const tripDates = { start: startDate, end: endDate };
+  const tripDates = { 
+    start: startDate ? format(startDate, "yyyy-MM-dd") : "", 
+    end: endDate ? format(endDate, "yyyy-MM-dd") : "" 
+  };
 
   // Initialize days when moving to step 3
   const initializeDays = () => {
     if (days.length === 0 && startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const numDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      const numDays = differenceInDays(endDate, startDate) + 1;
       
       const newDays: Day[] = [];
       for (let i = 0; i < numDays; i++) {
-        const date = new Date(start);
-        date.setDate(date.getDate() + i);
-        newDays.push(emptyDay(i + 1, date.toISOString().split('T')[0]));
+        const date = addDays(startDate, i);
+        newDays.push(emptyDay(i + 1, format(date, "yyyy-MM-dd")));
       }
       setDays(newDays);
     }
@@ -149,10 +152,10 @@ const BuildTrip = () => {
   // Day handlers
   const handleAddDay = () => {
     const lastDay = days[days.length - 1];
-    const lastDate = lastDay ? new Date(lastDay.date) : new Date(startDate);
-    lastDate.setDate(lastDate.getDate() + 1);
+    const lastDate = lastDay ? new Date(lastDay.date) : (startDate || new Date());
+    const newDate = addDays(lastDate, lastDay ? 1 : 0);
     
-    const newDay = emptyDay(days.length + 1, lastDate.toISOString().split('T')[0]);
+    const newDay = emptyDay(days.length + 1, format(newDate, "yyyy-MM-dd"));
     setDays([...days, newDay]);
     toast({ title: "Day added" });
   };
@@ -462,21 +465,71 @@ const BuildTrip = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Start Date *</Label>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !startDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {startDate ? format(startDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={(date) => {
+                          setStartDate(date);
+                          setEndDate(undefined);
+                        }}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-2">
                   <Label>End Date *</Label>
-                  <Input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !endDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {endDate ? format(endDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={setEndDate}
+                        disabled={(date) =>
+                          date < new Date(new Date().setHours(0, 0, 0, 0)) ||
+                          (startDate ? date < startDate : false) ||
+                          (startDate ? date > addDays(startDate, 13) : false)
+                        }
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
+              {startDate && endDate && (
+                <p className="text-center text-sm text-muted-foreground">
+                  {differenceInDays(endDate, startDate) + 1} day{differenceInDays(endDate, startDate) + 1 > 1 ? "s" : ""} trip
+                </p>
+              )}
             </div>
 
             <Button onClick={handleNext} className="w-full gap-2">
@@ -631,7 +684,7 @@ const BuildTrip = () => {
           <div className="space-y-6">
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-medium">
-                <Calendar className="w-3 h-3" />
+                <CalendarIcon className="w-3 h-3" />
                 Step 3: Daily Itinerary
               </div>
               <h2 className="text-xl font-bold text-foreground">
@@ -801,8 +854,8 @@ const BuildTrip = () => {
                   {destination}
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="w-4 h-4" />
-                  {startDate} to {endDate} ({days.length} days)
+                  <CalendarIcon className="w-4 h-4" />
+                  {startDate ? format(startDate, "PPP") : ""} to {endDate ? format(endDate, "PPP") : ""} ({days.length} days)
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="w-4 h-4" />

@@ -255,6 +255,40 @@ serve(async (req) => {
       const totalPrice = parseFloat(price?.total || "0");
       const pricePerNight = nights > 0 ? (totalPrice / nights).toFixed(2) : price?.total;
 
+      // Format room type - remove codes like "A01", "ROH", etc.
+      const rawRoomType = bestOffer?.room?.typeEstimated?.category || bestOffer?.room?.type || "";
+      const bedType = bestOffer?.room?.typeEstimated?.bedType || "";
+      
+      // Clean up room type - map common codes to readable names
+      const roomTypeMap: Record<string, string> = {
+        "STANDARD_ROOM": "Standard Room",
+        "SUPERIOR_ROOM": "Superior Room",
+        "DELUXE_ROOM": "Deluxe Room",
+        "SUITE": "Suite",
+        "JUNIOR_SUITE": "Junior Suite",
+        "EXECUTIVE_ROOM": "Executive Room",
+        "FAMILY_ROOM": "Family Room",
+      };
+      
+      let roomType = roomTypeMap[rawRoomType] || "";
+      // If still a code (like "A01"), just use bed type or generic description
+      if (!roomType || /^[A-Z0-9]{2,4}$/.test(rawRoomType)) {
+        roomType = "";
+      }
+      
+      // Format bed type
+      const bedTypeMap: Record<string, string> = {
+        "SINGLE": "Single Bed",
+        "DOUBLE": "Double Bed",
+        "TWIN": "Twin Beds",
+        "QUEEN": "Queen Bed",
+        "KING": "King Bed",
+      };
+      const formattedBedType = bedTypeMap[bedType] || (bedType ? bedType.charAt(0) + bedType.slice(1).toLowerCase() + " Bed" : "");
+      
+      // Combine room description
+      const roomDescription = [roomType, formattedBedType].filter(Boolean).join(" • ") || null;
+
       return {
         name: hotel.name,
         hotelId: hotel.hotelId,
@@ -264,8 +298,7 @@ serve(async (req) => {
         pricePerNight: `$${pricePerNight}`,
         totalPrice: `$${price?.total || "N/A"}`,
         currency: price?.currency || "USD",
-        roomType: bestOffer?.room?.type || "Standard Room",
-        bedType: bestOffer?.room?.typeEstimated?.bedType || "",
+        roomType: roomDescription,
         amenities: hotel.amenities || [],
         checkInTime: bestOffer?.checkInDate || checkInDate,
         checkOutTime: bestOffer?.checkOutDate || checkOutDate,

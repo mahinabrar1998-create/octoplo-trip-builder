@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 const EntryCards = () => {
   const navigate = useNavigate();
   const [scratchClicked, setScratchClicked] = useState(false);
-  return <section id="how-it-works" className="py-12 px-6 md:py-[8px] pb-[12px]">
+  return <section id="how-it-works" className="py-12 px-6 md:py-[8px] pb-[20px]">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-6">
           {/* Primary Card - AI Generated */}

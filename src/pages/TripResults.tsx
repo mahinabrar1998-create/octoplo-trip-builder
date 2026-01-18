@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/collapsible";
 import {
   ArrowLeft,
+  Calendar,
   Clock,
   MapPin,
   DollarSign,
@@ -375,14 +376,24 @@ const TripResults = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">
             {plan.summary}
           </p>
-          <div className="flex items-center justify-center gap-6 text-sm">
-            <span className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4 text-primary" />
-              {plan.estimatedTotalCost}
+          
+          {/* First line: Dates and Days */}
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <span className="flex items-center gap-1 bg-muted text-muted-foreground px-3 py-1.5 rounded-full">
+              <Calendar className="w-4 h-4" />
+              {new Date(plan.days[0]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {new Date(plan.days[plan.days.length - 1]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-primary" />
+            <span className="flex items-center gap-1 bg-muted text-muted-foreground px-3 py-1.5 rounded-full">
+              <Clock className="w-4 h-4" />
               {plan.days.length} days
+            </span>
+          </div>
+          
+          {/* Second line: Total Cost - simplified with dark grey fill and white border */}
+          <div className="flex items-center justify-center">
+            <span className="flex items-center gap-2 bg-zinc-800 text-white border border-white/30 px-4 py-2 rounded-full text-sm font-medium">
+              <DollarSign className="w-4 h-4" />
+              {plan.estimatedTotalCost.split('(')[0].trim()}
             </span>
           </div>
         </div>

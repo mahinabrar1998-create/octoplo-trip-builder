@@ -400,11 +400,7 @@ const PublishedTrip = () => {
                 {plan.packingTips.map((tip, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-full text-sm font-medium"
-                    style={{ 
-                      backgroundColor: "var(--theme-secondary)",
-                      color: "rgba(255,255,255,0.8)"
-                    }}
+                    className="px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20"
                   >
                     {tip}
                   </span>
@@ -470,13 +466,7 @@ const PublishedTrip = () => {
                       </div>
                     </div>
                     {day.weather.note && (
-                      <p 
-                        className="mt-3 text-sm px-4 py-2 rounded-lg"
-                        style={{ 
-                          backgroundColor: "var(--theme-secondary)", 
-                          color: "rgba(255,255,255,0.8)" 
-                        }}
-                      >
+                      <p className="mt-3 text-sm px-4 py-2 rounded-lg bg-white/10 text-white border border-white/10">
                         💡 {day.weather.note}
                       </p>
                     )}
@@ -546,27 +536,15 @@ const PublishedTrip = () => {
                           </div>
 
                           {block.transportNote && (
-                            <div 
-                              className="flex items-start gap-2 text-sm p-3 rounded-lg mb-2"
-                              style={{ 
-                                backgroundColor: "var(--theme-secondary)", 
-                                color: "rgba(255,255,255,0.7)" 
-                              }}
-                            >
-                              <Navigation className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--theme-accent)" }} />
+                            <div className="flex items-start gap-2 text-sm p-3 rounded-lg bg-violet-500/20 text-violet-200 border border-violet-500/30">
+                              <Navigation className="w-4 h-4 mt-0.5 shrink-0 text-violet-300" />
                               <span>{block.transportNote}</span>
                             </div>
                           )}
 
                           {block.weatherConsideration && (
-                            <div 
-                              className="flex items-start gap-2 text-sm p-3 rounded-lg"
-                              style={{ 
-                                backgroundColor: "rgba(59, 130, 246, 0.1)", 
-                                color: "rgb(147, 197, 253)" 
-                              }}
-                            >
-                              <Cloud className="w-4 h-4 mt-0.5 shrink-0" />
+                            <div className="flex items-start gap-2 text-sm p-3 rounded-lg mt-2 bg-sky-500/20 text-sky-200 border border-sky-500/30">
+                              <Cloud className="w-4 h-4 mt-0.5 shrink-0 text-sky-300" />
                               <span>{block.weatherConsideration}</span>
                             </div>
                           )}

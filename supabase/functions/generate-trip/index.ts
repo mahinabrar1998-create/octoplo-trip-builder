@@ -179,7 +179,7 @@ CRITICAL Guidelines for DETAILED planning:
 - The estimatedTotalCost should include flights, hotel, and all activities
 - All costs MUST be in US dollars ($)
 - **SUMMARY MUST BE 15-20 WORDS MAX** - Keep it punchy and brief, like a tagline
-- **PACKING TIPS**: Include exactly 3 short packing tips (2-4 words each)`;
+- **PACKING TIPS**: Include exactly 3 packing tips, each one short sentence (max 8 words)`;
 
 
     const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.

@@ -2,3 +2,6 @@ project_id = "oztpfiuahuzehwtvspfz"
 
 [functions.generate-trip]
 verify_jwt = false
+
+[functions.generate-hero-image]
+verify_jwt = false

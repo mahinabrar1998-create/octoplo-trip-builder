@@ -23,6 +23,7 @@ export type Database = {
           id: string
           plan: Json
           start_date: string
+          theme_colors: Json | null
         }
         Insert: {
           created_at?: string
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           plan: Json
           start_date: string
+          theme_colors?: Json | null
         }
         Update: {
           created_at?: string
@@ -41,6 +43,7 @@ export type Database = {
           id?: string
           plan?: Json
           start_date?: string
+          theme_colors?: Json | null
         }
         Relationships: []
       }

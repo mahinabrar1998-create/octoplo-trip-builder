@@ -498,7 +498,7 @@ const TripResults = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
             {plan.name}
           </h1>
-          <p className="text-muted-foreground text-sm max-w-xl mx-auto line-clamp-2">
+          <p className="text-muted-foreground text-sm max-w-xl mx-auto">
             {plan.summary}
           </p>
           
@@ -534,7 +534,7 @@ const TripResults = () => {
               <h3 className="font-medium text-foreground text-sm">Packing Tips</h3>
             </div>
             <div className="flex flex-wrap gap-2">
-              {plan.packingTips.slice(0, 4).map((tip, i) => (
+              {plan.packingTips.slice(0, 3).map((tip, i) => (
                 <span key={i} className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
                   {tip}
                 </span>

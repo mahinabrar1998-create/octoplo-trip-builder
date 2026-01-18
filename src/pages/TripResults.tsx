@@ -37,6 +37,8 @@ import SoothingGradient from "@/components/SoothingGradient";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { EditFlightsDrawer } from "@/components/EditFlightsDrawer";
+import { EditHotelDrawer } from "@/components/EditHotelDrawer";
 import { EditTimeBlockDrawer } from "@/components/EditTimeBlockDrawer";
 
 type Weather = {
@@ -156,6 +158,8 @@ const TripResults = () => {
     dayNumber: number;
     blockIndex: number;
   } | null>(null);
+  const [editFlightsOpen, setEditFlightsOpen] = useState(false);
+  const [editHotelOpen, setEditHotelOpen] = useState(false);
 
   const tripData = location.state?.tripData;
 
@@ -189,6 +193,18 @@ const TripResults = () => {
       title: "Block updated",
       description: "Your changes have been saved.",
     });
+  };
+
+  const handleSaveFlights = (updatedFlights: Flights) => {
+    if (!plan) return;
+    setPlan({ ...plan, flights: updatedFlights });
+    toast({ title: "Flights updated" });
+  };
+
+  const handleSaveHotel = (updatedHotel: HotelType) => {
+    if (!plan) return;
+    setPlan({ ...plan, hotel: updatedHotel });
+    toast({ title: "Accommodation updated" });
   };
 
   // Generate AI hero image for the destination
@@ -501,12 +517,18 @@ const TripResults = () => {
           </div>
         </div>
 
-        {/* Flights Section - Compact */}
+        {/* Flights Section - Compact & Clickable */}
         {plan.flights && (
-          <div className="bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft">
-            <div className="flex items-center gap-2 mb-3">
-              <Plane className="w-4 h-4 text-primary" />
-              <h3 className="font-medium text-foreground text-sm">Flights</h3>
+          <button
+            onClick={() => setEditFlightsOpen(true)}
+            className="w-full text-left bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft hover:border-primary/40 hover:shadow-md transition-all group"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Plane className="w-4 h-4 text-primary" />
+                <h3 className="font-medium text-foreground text-sm">Flights</h3>
+              </div>
+              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <div className="grid md:grid-cols-2 gap-3">
               <div className="bg-muted/50 rounded-lg p-3 space-y-1">
@@ -534,15 +556,21 @@ const TripResults = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </button>
         )}
 
-        {/* Hotel Section - Compact */}
+        {/* Hotel Section - Compact & Clickable */}
         {plan.hotel && (
-          <div className="bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft">
-            <div className="flex items-center gap-2 mb-3">
-              <Hotel className="w-4 h-4 text-primary" />
-              <h3 className="font-medium text-foreground text-sm">Accommodation</h3>
+          <button
+            onClick={() => setEditHotelOpen(true)}
+            className="w-full text-left bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft hover:border-primary/40 hover:shadow-md transition-all group"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Hotel className="w-4 h-4 text-primary" />
+                <h3 className="font-medium text-foreground text-sm">Accommodation</h3>
+              </div>
+              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             <div className="bg-muted/50 rounded-lg p-3 space-y-2">
               <div className="flex items-start justify-between">
@@ -568,7 +596,7 @@ const TripResults = () => {
                 ))}
               </div>
             </div>
-          </div>
+          </button>
         )}
 
         {/* Days - Accordion Style */}
@@ -737,7 +765,7 @@ const TripResults = () => {
         </div>
       </div>
 
-      {/* Edit Drawer */}
+      {/* Edit Drawers */}
       <EditTimeBlockDrawer
         open={editDrawerOpen}
         onOpenChange={setEditDrawerOpen}
@@ -750,6 +778,30 @@ const TripResults = () => {
           end: tripData?.endDate || "",
         }}
         onSave={handleSaveBlock}
+      />
+
+      <EditFlightsDrawer
+        open={editFlightsOpen}
+        onOpenChange={setEditFlightsOpen}
+        flights={plan.flights || null}
+        destination={tripData?.destination || ""}
+        tripDates={{
+          start: tripData?.startDate || "",
+          end: tripData?.endDate || "",
+        }}
+        onSave={handleSaveFlights}
+      />
+
+      <EditHotelDrawer
+        open={editHotelOpen}
+        onOpenChange={setEditHotelOpen}
+        hotel={plan.hotel || null}
+        destination={tripData?.destination || ""}
+        tripDates={{
+          start: tripData?.startDate || "",
+          end: tripData?.endDate || "",
+        }}
+        onSave={handleSaveHotel}
       />
     </div>
   );

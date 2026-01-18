@@ -20,15 +20,13 @@ const EntryCards = () => {
               Let Octoplo build it for you
             </h3>
             
-            <p className="text-muted-foreground mb-8 leading-relaxed">Answer a few questions and get a complete trip plan.</p>
+            <p className="text-muted-foreground mb-8 leading-relaxed">Answer a few questions and get a complete trip plan under a minute.</p>
 
             <Button size="lg" className="w-full rounded-xl font-medium shadow-soft" onClick={() => navigate("/generate")}>
               Generate my trip
             </Button>
 
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              Takes under a minute
-            </p>
+            
           </div>
 
           {/* Secondary Card - Manual */}
@@ -42,15 +40,13 @@ const EntryCards = () => {
               Build it myself
             </h3>
             
-            <p className="text-muted-foreground mb-8 leading-relaxed">Create your own itinerary time-block by time-block .</p>
+            <p className="text-muted-foreground mb-8 leading-relaxed">Create your own itinerary time-block by time-block with or without AI suggestions.</p>
 
             <Button variant="outline" size="lg" type="button" aria-pressed={scratchClicked} className={`w-full rounded-xl font-medium transition-colors ${scratchClicked ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary" : "hover:bg-primary hover:text-primary-foreground hover:border-primary active:bg-primary active:text-primary-foreground"}`} onPointerDown={() => setScratchClicked(true)} onClick={() => setScratchClicked(true)}>
               Start from scratch
             </Button>
 
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              AI suggestions are optional
-            </p>
+            
           </div>
         </div>
       </div>

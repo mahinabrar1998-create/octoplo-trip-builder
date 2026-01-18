@@ -120,56 +120,72 @@ const TripResults = () => {
     );
   };
 
-  const getHeroImageUrl = (destination: string) => {
-    // Using Unsplash image API with destination search
-    const encodedDest = encodeURIComponent(destination.split(",")[0].trim());
-    return `https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1920&h=1080&fit=crop&q=80`;
-  };
 
-  // Fetch a real destination image using Unsplash
-  const fetchDestinationImage = async (destination: string): Promise<string> => {
+  // Generate AI hero image for the destination
+  const generateHeroImage = async (destination: string, theme: string): Promise<string> => {
     try {
-      // Use a curated list of travel images based on common destinations
-      const destinationImages: Record<string, string> = {
-        "paris": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1920&h=1080&fit=crop",
-        "london": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1920&h=1080&fit=crop",
-        "new york": "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1920&h=1080&fit=crop",
-        "tokyo": "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&h=1080&fit=crop",
-        "rome": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1920&h=1080&fit=crop",
-        "barcelona": "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=1920&h=1080&fit=crop",
-        "dubai": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1920&h=1080&fit=crop",
-        "singapore": "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=1920&h=1080&fit=crop",
-        "bali": "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1920&h=1080&fit=crop",
-        "sydney": "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=1920&h=1080&fit=crop",
-        "amsterdam": "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=1920&h=1080&fit=crop",
-        "los angeles": "https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=1920&h=1080&fit=crop",
-        "miami": "https://images.unsplash.com/photo-1506966953602-c20cc11f75e3?w=1920&h=1080&fit=crop",
-        "hawaii": "https://images.unsplash.com/photo-1507876466758-bc54f384809c?w=1920&h=1080&fit=crop",
-        "maldives": "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1920&h=1080&fit=crop",
-        "iceland": "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1920&h=1080&fit=crop",
-        "greece": "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1920&h=1080&fit=crop",
-        "switzerland": "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=1920&h=1080&fit=crop",
-        "italy": "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=1920&h=1080&fit=crop",
-        "spain": "https://images.unsplash.com/photo-1543783207-ec64e4d95325?w=1920&h=1080&fit=crop",
-        "thailand": "https://images.unsplash.com/photo-1528181304800-259b08848526?w=1920&h=1080&fit=crop",
-        "japan": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1920&h=1080&fit=crop",
-        "mexico": "https://images.unsplash.com/photo-1518105779142-d975f22f1b0a?w=1920&h=1080&fit=crop",
-        "canada": "https://images.unsplash.com/photo-1517935706615-2717063c2225?w=1920&h=1080&fit=crop",
-        "australia": "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=1920&h=1080&fit=crop",
-      };
+      const { data, error } = await supabase.functions.invoke("generate-hero-image", {
+        body: { destination, theme },
+      });
 
-      const destLower = destination.toLowerCase();
-      for (const [key, url] of Object.entries(destinationImages)) {
-        if (destLower.includes(key)) {
-          return url;
-        }
+      if (error) {
+        console.error("Error generating hero image:", error);
+        throw error;
       }
 
-      // Default beautiful travel image
-      return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&h=1080&fit=crop";
-    } catch {
+      if (data?.imageUrl) {
+        return data.imageUrl;
+      }
+
+      throw new Error("No image URL returned");
+    } catch (err) {
+      console.error("Failed to generate hero image:", err);
+      // Fallback to a default travel image
       return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&h=1080&fit=crop";
     }
+  };
+
+  // Generate destination theme colors
+  const getDestinationTheme = (destination: string): { primary: string; secondary: string; accent: string; gradient: string } => {
+    const dest = destination.toLowerCase();
+    
+    // Tropical destinations
+    if (dest.includes("bali") || dest.includes("hawaii") || dest.includes("maldives") || dest.includes("caribbean") || dest.includes("fiji")) {
+      return { primary: "158 64% 52%", secondary: "180 60% 90%", accent: "43 96% 56%", gradient: "from-teal-500/20 via-cyan-400/10 to-yellow-400/20" };
+    }
+    // European cities
+    if (dest.includes("paris") || dest.includes("rome") || dest.includes("venice") || dest.includes("florence")) {
+      return { primary: "15 80% 50%", secondary: "30 50% 95%", accent: "45 93% 47%", gradient: "from-amber-500/20 via-orange-400/10 to-rose-400/20" };
+    }
+    // Nordic/Cold destinations
+    if (dest.includes("iceland") || dest.includes("norway") || dest.includes("sweden") || dest.includes("finland") || dest.includes("alaska")) {
+      return { primary: "200 80% 50%", secondary: "200 30% 95%", accent: "170 80% 40%", gradient: "from-blue-400/20 via-cyan-300/10 to-teal-400/20" };
+    }
+    // Asian destinations
+    if (dest.includes("tokyo") || dest.includes("japan") || dest.includes("kyoto")) {
+      return { primary: "350 80% 60%", secondary: "350 20% 95%", accent: "150 50% 45%", gradient: "from-pink-400/20 via-rose-300/10 to-green-400/20" };
+    }
+    if (dest.includes("thailand") || dest.includes("bangkok") || dest.includes("vietnam")) {
+      return { primary: "35 90% 55%", secondary: "35 40% 95%", accent: "160 60% 45%", gradient: "from-orange-400/20 via-amber-300/10 to-emerald-400/20" };
+    }
+    // Desert/Middle East
+    if (dest.includes("dubai") || dest.includes("morocco") || dest.includes("egypt") || dest.includes("jordan")) {
+      return { primary: "30 70% 50%", secondary: "30 30% 95%", accent: "20 80% 45%", gradient: "from-amber-500/20 via-orange-400/10 to-red-400/20" };
+    }
+    // Mountain destinations
+    if (dest.includes("switzerland") || dest.includes("alps") || dest.includes("colorado") || dest.includes("aspen") || dest.includes("breckenridge")) {
+      return { primary: "210 60% 50%", secondary: "210 20% 95%", accent: "150 60% 40%", gradient: "from-blue-400/20 via-slate-300/10 to-emerald-400/20" };
+    }
+    // Beach destinations
+    if (dest.includes("miami") || dest.includes("cancun") || dest.includes("bahamas")) {
+      return { primary: "185 70% 50%", secondary: "185 30% 95%", accent: "330 70% 55%", gradient: "from-cyan-400/20 via-teal-300/10 to-pink-400/20" };
+    }
+    // Urban metropolis
+    if (dest.includes("new york") || dest.includes("london") || dest.includes("singapore") || dest.includes("hong kong")) {
+      return { primary: "220 60% 45%", secondary: "220 20% 95%", accent: "40 80% 50%", gradient: "from-slate-400/20 via-gray-300/10 to-amber-400/20" };
+    }
+    // Default warm travel theme
+    return { primary: "20 80% 55%", secondary: "20 30% 95%", accent: "180 60% 45%", gradient: "from-orange-400/20 via-amber-300/10 to-teal-400/20" };
   };
 
   const handlePublish = async () => {
@@ -177,7 +193,13 @@ const TripResults = () => {
 
     setPublishing(true);
     try {
-      const heroImageUrl = await fetchDestinationImage(tripData.destination);
+      toast({
+        title: "Generating your website...",
+        description: "Creating a custom hero image for your trip.",
+      });
+
+      const heroImageUrl = await generateHeroImage(tripData.destination, plan.theme);
+      const themeColors = getDestinationTheme(tripData.destination);
       
       const { data, error: insertError } = await supabase
         .from("published_trips" as never)
@@ -187,6 +209,7 @@ const TripResults = () => {
           end_date: tripData.endDate,
           plan: plan as unknown,
           hero_image_url: heroImageUrl,
+          theme_colors: themeColors as unknown,
         } as never)
         .select("id")
         .single();

@@ -334,86 +334,73 @@ const TripResults = () => {
       <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
         <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
-          {/* Simple Line Octopus Throbber */}
-          <div className="relative w-32 h-32 mx-auto">
+          {/* Mountain Climber Throbber */}
+          <div className="relative w-28 h-28 mx-auto">
             <svg viewBox="0 0 100 100" className="w-full h-full">
-              {/* Octopus Head */}
-              <circle 
-                cx="50" 
-                cy="35" 
-                r="18" 
+              {/* Mountain/Wall outline */}
+              <path 
+                d="M 85 5 L 85 95 L 5 95" 
                 fill="none" 
                 className="stroke-primary" 
-                strokeWidth="3"
-              />
-              {/* Eyes */}
-              <circle cx="44" cy="32" r="2" className="fill-primary" />
-              <circle cx="56" cy="32" r="2" className="fill-primary" />
-              {/* Smile */}
-              <path 
-                d="M 44 40 Q 50 45 56 40" 
-                fill="none" 
-                className="stroke-primary" 
-                strokeWidth="2" 
+                strokeWidth="3" 
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
-              {/* Tentacles - 8 wavy lines */}
-              <path 
-                d="M 32 48 Q 25 60 28 75" 
-                fill="none" 
-                className="stroke-primary animate-[wave1_1s_ease-in-out_infinite]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 38 50 Q 32 65 35 80" 
-                fill="none" 
-                className="stroke-primary animate-[wave2_1s_ease-in-out_infinite_0.1s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 44 52 Q 40 68 42 82" 
-                fill="none" 
-                className="stroke-primary animate-[wave1_1s_ease-in-out_infinite_0.2s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 50 53 Q 50 70 50 85" 
-                fill="none" 
-                className="stroke-primary animate-[wave2_1s_ease-in-out_infinite_0.3s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 56 52 Q 60 68 58 82" 
-                fill="none" 
-                className="stroke-primary animate-[wave1_1s_ease-in-out_infinite_0.4s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 62 50 Q 68 65 65 80" 
-                fill="none" 
-                className="stroke-primary animate-[wave2_1s_ease-in-out_infinite_0.5s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 68 48 Q 75 60 72 75" 
-                fill="none" 
-                className="stroke-primary animate-[wave1_1s_ease-in-out_infinite_0.6s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
-              <path 
-                d="M 72 44 Q 82 55 78 70" 
-                fill="none" 
-                className="stroke-primary animate-[wave2_1s_ease-in-out_infinite_0.7s]" 
-                strokeWidth="2.5" 
-                strokeLinecap="round"
-              />
+              
+              {/* Climber - animated group */}
+              <g className="animate-[climb_2s_ease-in-out_infinite]">
+                {/* Head */}
+                <circle cx="45" cy="30" r="8" fill="none" className="stroke-primary" strokeWidth="3" />
+                
+                {/* Body/Torso */}
+                <path 
+                  d="M 45 38 L 55 55" 
+                  fill="none" 
+                  className="stroke-primary" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                />
+                
+                {/* Left arm reaching up */}
+                <path 
+                  d="M 48 42 L 35 28 L 30 20" 
+                  fill="none" 
+                  className="stroke-primary" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                
+                {/* Right arm gripping */}
+                <path 
+                  d="M 50 48 L 65 40 L 75 35" 
+                  fill="none" 
+                  className="stroke-primary" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                
+                {/* Left leg bent up */}
+                <path 
+                  d="M 55 55 L 45 65 L 40 75" 
+                  fill="none" 
+                  className="stroke-primary" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                
+                {/* Right leg pushing */}
+                <path 
+                  d="M 55 55 L 70 65 L 78 72" 
+                  fill="none" 
+                  className="stroke-primary" 
+                  strokeWidth="3" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </g>
             </svg>
           </div>
           
@@ -427,13 +414,9 @@ const TripResults = () => {
           </div>
         </div>
         <style>{`
-          @keyframes wave1 {
-            0%, 100% { transform: translateX(0) rotate(0deg); }
-            50% { transform: translateX(-3px) rotate(-5deg); }
-          }
-          @keyframes wave2 {
-            0%, 100% { transform: translateX(0) rotate(0deg); }
-            50% { transform: translateX(3px) rotate(5deg); }
+          @keyframes climb {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
           }
         `}</style>
       </div>

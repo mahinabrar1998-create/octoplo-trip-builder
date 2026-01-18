@@ -13,6 +13,9 @@ const Hero = () => {
         </h1>
 
         {/* Subheadline */}
+        <p className="text-lg md:text-xl text-muted-foreground">
+          One shared place to plan, decide, and remember your trip.
+        </p>
         
       </div>
     </section>;

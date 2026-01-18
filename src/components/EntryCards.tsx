@@ -42,9 +42,7 @@ const EntryCards = () => {
               Build it myself
             </h3>
             
-            <p className="text-muted-foreground mb-8 leading-relaxed">
-              Create your itinerary time-block by time-block. Octoplo suggests activities, costs, and backups as you go.
-            </p>
+            <p className="text-muted-foreground mb-8 leading-relaxed">Create your own itinerary time-block by time-block .</p>
 
             <Button variant="outline" size="lg" type="button" aria-pressed={scratchClicked} className={`w-full rounded-xl font-medium transition-colors ${scratchClicked ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary" : "hover:bg-primary hover:text-primary-foreground hover:border-primary active:bg-primary active:text-primary-foreground"}`} onPointerDown={() => setScratchClicked(true)} onClick={() => setScratchClicked(true)}>
               Start from scratch

@@ -659,53 +659,95 @@ const TripResults = () => {
 
                 <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
                   <div className="pt-2 pl-4 space-y-2">
-                    {day.blocks.map((block, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleEditBlock(block, day.dayNumber, i)}
-                        className="w-full text-left flex gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/40 hover:shadow-sm transition-all group"
-                      >
-                        <div className="text-xs font-medium text-muted-foreground w-14 shrink-0">
-                          {block.time}
-                          <br />
-                          <span className="opacity-70">{block.endTime}</span>
-                        </div>
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-medium text-foreground text-sm">{block.title}</h4>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <span
-                                className={`text-xs px-1.5 py-0.5 rounded-full border ${
-                                  categoryColors[block.category] || categoryColors["activity"]
-                                }`}
-                              >
-                                {block.category}
-                              </span>
-                              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1">{block.description}</p>
+                    {day.blocks.map((block, i) => {
+                      // Check for time overlap with previous block
+                      const hasOverlap = i > 0 && (() => {
+                        const prevBlock = day.blocks[i - 1];
+                        const parseTime = (time: string) => {
+                          const [timePart, period] = time.split(' ');
+                          let [hours, minutes] = timePart.split(':').map(Number);
+                          if (period === 'PM' && hours !== 12) hours += 12;
+                          if (period === 'AM' && hours === 12) hours = 0;
+                          return hours * 60 + minutes;
+                        };
+                        try {
+                          const prevEnd = parseTime(prevBlock.endTime);
+                          const currentStart = parseTime(block.time);
+                          return currentStart < prevEnd;
+                        } catch {
+                          return false;
+                        }
+                      })();
 
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              <span className="truncate max-w-[120px]">{block.location}</span>
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="w-3 h-3" />
-                              {block.estimatedCost}
-                            </span>
-                          </div>
+                      // Smart cost display: show $ icon only for "Free", not for values that already have $
+                      const costDisplay = (() => {
+                        const cost = block.estimatedCost.trim().toLowerCase();
+                        if (cost === 'free' || cost === '0' || cost === '$0') {
+                          return { showIcon: true, text: 'Free' };
+                        }
+                        // If already has $ sign, don't show icon
+                        if (block.estimatedCost.includes('$')) {
+                          return { showIcon: false, text: block.estimatedCost };
+                        }
+                        return { showIcon: true, text: block.estimatedCost };
+                      })();
 
-                          {block.transportNote && (
-                            <div className="flex items-center gap-1 text-xs text-purple-600">
-                              <Navigation className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{block.transportNote}</span>
-                            </div>
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => handleEditBlock(block, day.dayNumber, i)}
+                          className={cn(
+                            "w-full text-left flex gap-3 p-3 rounded-xl bg-card border hover:border-primary/40 hover:shadow-sm transition-all group",
+                            hasOverlap ? "border-red-300" : "border-border/50"
                           )}
-                        </div>
-                      </button>
-                    ))}
+                        >
+                          <div className="text-xs font-medium text-muted-foreground w-14 shrink-0">
+                            {block.time}
+                            <br />
+                            <span className="opacity-70">{block.endTime}</span>
+                            {hasOverlap && (
+                              <div className="mt-1 text-[10px] text-red-500 font-medium">
+                                ⚠ Overlap
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="font-medium text-foreground text-sm">{block.title}</h4>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span
+                                  className={`text-xs px-1.5 py-0.5 rounded-full border ${
+                                    categoryColors[block.category] || categoryColors["activity"]
+                                  }`}
+                                >
+                                  {block.category}
+                                </span>
+                                <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{block.description}</p>
+
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                <span className="truncate max-w-[120px]">{block.location}</span>
+                              </span>
+                              <span className="flex items-center gap-1">
+                                {costDisplay.showIcon && <DollarSign className="w-3 h-3" />}
+                                {costDisplay.text}
+                              </span>
+                            </div>
+
+                            {block.transportNote && (
+                              <div className="flex items-center gap-1 text-xs text-purple-600">
+                                <Navigation className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{block.transportNote}</span>
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </CollapsibleContent>
               </Collapsible>

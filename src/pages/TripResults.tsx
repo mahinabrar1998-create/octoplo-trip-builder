@@ -387,34 +387,6 @@ const TripResults = () => {
           </div>
         </div>
 
-        {/* Highlights */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {plan.highlights.map((highlight, i) => (
-            <span
-              key={i}
-              className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm"
-            >
-              {highlight}
-            </span>
-          ))}
-        </div>
-
-        {/* Packing Tips */}
-        {plan.packingTips && plan.packingTips.length > 0 && (
-          <div className="bg-card rounded-xl p-4 mb-8 border border-border/50">
-            <h3 className="font-semibold text-foreground mb-2 text-sm">📦 Packing Tips</h3>
-            <div className="flex flex-wrap gap-2">
-              {plan.packingTips.map((tip, i) => (
-                <span
-                  key={i}
-                  className="bg-primary/10 text-foreground px-3 py-1 rounded-full text-xs"
-                >
-                  {tip}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Days - Accordion Style */}
         <div className="space-y-3">

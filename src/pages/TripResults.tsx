@@ -31,11 +31,13 @@ import {
   Hotel,
   Star,
   ArrowRight,
+  Pencil,
 } from "lucide-react";
 import SoothingGradient from "@/components/SoothingGradient";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { EditTimeBlockDrawer } from "@/components/EditTimeBlockDrawer";
 
 type Weather = {
   condition: "sunny" | "partly-cloudy" | "cloudy" | "rainy" | "stormy" | "snowy" | "windy";
@@ -79,7 +81,7 @@ type Flights = {
   return: FlightInfo;
 };
 
-type Hotel = {
+type HotelType = {
   name: string;
   address: string;
   neighborhood: string;
@@ -98,7 +100,7 @@ type TripPlan = {
   theme: string;
   summary: string;
   flights?: Flights;
-  hotel?: Hotel;
+  hotel?: HotelType;
   days: Day[];
   estimatedTotalCost: string;
   highlights: string[];
@@ -114,7 +116,7 @@ const categoryColors: Record<string, string> = {
 };
 
 const WeatherIcon = ({ condition }: { condition: Weather["condition"] }) => {
-  const iconClass = "w-6 h-6";
+  const iconClass = "w-5 h-5";
   switch (condition) {
     case "sunny":
       return <Sun className={cn(iconClass, "text-yellow-500")} />;
@@ -147,6 +149,14 @@ const TripResults = () => {
   const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  // Edit drawer state
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<{
+    block: TimeBlock;
+    dayNumber: number;
+    blockIndex: number;
+  } | null>(null);
+
   const tripData = location.state?.tripData;
 
   const toggleDay = (dayNumber: number) => {
@@ -157,6 +167,29 @@ const TripResults = () => {
     );
   };
 
+  const handleEditBlock = (block: TimeBlock, dayNumber: number, blockIndex: number) => {
+    setEditingBlock({ block, dayNumber, blockIndex });
+    setEditDrawerOpen(true);
+  };
+
+  const handleSaveBlock = (dayNumber: number, blockIndex: number, updatedBlock: TimeBlock) => {
+    if (!plan) return;
+
+    const updatedDays = plan.days.map((day) => {
+      if (day.dayNumber === dayNumber) {
+        const updatedBlocks = [...day.blocks];
+        updatedBlocks[blockIndex] = updatedBlock;
+        return { ...day, blocks: updatedBlocks };
+      }
+      return day;
+    });
+
+    setPlan({ ...plan, days: updatedDays });
+    toast({
+      title: "Block updated",
+      description: "Your changes have been saved.",
+    });
+  };
 
   // Generate AI hero image for the destination
   const generateHeroImage = async (destination: string, theme: string): Promise<string> => {
@@ -177,7 +210,6 @@ const TripResults = () => {
       throw new Error("No image URL returned");
     } catch (err) {
       console.error("Failed to generate hero image:", err);
-      // Fallback to a default travel image
       return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&h=1080&fit=crop";
     }
   };
@@ -186,42 +218,33 @@ const TripResults = () => {
   const getDestinationTheme = (destination: string): { primary: string; secondary: string; accent: string; gradient: string } => {
     const dest = destination.toLowerCase();
     
-    // Tropical destinations
     if (dest.includes("bali") || dest.includes("hawaii") || dest.includes("maldives") || dest.includes("caribbean") || dest.includes("fiji")) {
       return { primary: "158 64% 52%", secondary: "180 60% 90%", accent: "43 96% 56%", gradient: "from-teal-500/20 via-cyan-400/10 to-yellow-400/20" };
     }
-    // European cities
     if (dest.includes("paris") || dest.includes("rome") || dest.includes("venice") || dest.includes("florence")) {
       return { primary: "15 80% 50%", secondary: "30 50% 95%", accent: "45 93% 47%", gradient: "from-amber-500/20 via-orange-400/10 to-rose-400/20" };
     }
-    // Nordic/Cold destinations
     if (dest.includes("iceland") || dest.includes("norway") || dest.includes("sweden") || dest.includes("finland") || dest.includes("alaska")) {
       return { primary: "200 80% 50%", secondary: "200 30% 95%", accent: "170 80% 40%", gradient: "from-blue-400/20 via-cyan-300/10 to-teal-400/20" };
     }
-    // Asian destinations
     if (dest.includes("tokyo") || dest.includes("japan") || dest.includes("kyoto")) {
       return { primary: "350 80% 60%", secondary: "350 20% 95%", accent: "150 50% 45%", gradient: "from-pink-400/20 via-rose-300/10 to-green-400/20" };
     }
     if (dest.includes("thailand") || dest.includes("bangkok") || dest.includes("vietnam")) {
       return { primary: "35 90% 55%", secondary: "35 40% 95%", accent: "160 60% 45%", gradient: "from-orange-400/20 via-amber-300/10 to-emerald-400/20" };
     }
-    // Desert/Middle East
     if (dest.includes("dubai") || dest.includes("morocco") || dest.includes("egypt") || dest.includes("jordan")) {
       return { primary: "30 70% 50%", secondary: "30 30% 95%", accent: "20 80% 45%", gradient: "from-amber-500/20 via-orange-400/10 to-red-400/20" };
     }
-    // Mountain destinations
     if (dest.includes("switzerland") || dest.includes("alps") || dest.includes("colorado") || dest.includes("aspen") || dest.includes("breckenridge")) {
       return { primary: "210 60% 50%", secondary: "210 20% 95%", accent: "150 60% 40%", gradient: "from-blue-400/20 via-slate-300/10 to-emerald-400/20" };
     }
-    // Beach destinations
     if (dest.includes("miami") || dest.includes("cancun") || dest.includes("bahamas")) {
       return { primary: "185 70% 50%", secondary: "185 30% 95%", accent: "330 70% 55%", gradient: "from-cyan-400/20 via-teal-300/10 to-pink-400/20" };
     }
-    // Urban metropolis
     if (dest.includes("new york") || dest.includes("london") || dest.includes("singapore") || dest.includes("hong kong")) {
       return { primary: "220 60% 45%", secondary: "220 20% 95%", accent: "40 80% 50%", gradient: "from-slate-400/20 via-gray-300/10 to-amber-400/20" };
     }
-    // Default warm travel theme
     return { primary: "20 80% 55%", secondary: "20 30% 95%", accent: "180 60% 45%", gradient: "from-orange-400/20 via-amber-300/10 to-teal-400/20" };
   };
 
@@ -336,23 +359,14 @@ const TripResults = () => {
         <div className="relative z-10 text-center space-y-6 p-8">
           {/* Fun Hiking Animation */}
           <div className="relative w-64 h-48 mx-auto">
-            {/* Ground/Path */}
             <div className="absolute bottom-8 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent rounded-full" />
             
-            {/* Walking Hiker */}
             <div className="absolute bottom-10 animate-[walk_2s_ease-in-out_infinite]">
               <div className="relative">
-                {/* Backpack */}
                 <div className="absolute -right-1 top-3 w-4 h-6 bg-primary/80 rounded-sm" />
                 <div className="absolute -right-0.5 top-2 w-2 h-2 bg-primary rounded-full" />
-                
-                {/* Head */}
                 <div className="w-6 h-6 bg-foreground rounded-full mx-auto" />
-                
-                {/* Body */}
                 <div className="w-4 h-8 bg-foreground rounded-sm mx-auto -mt-1" />
-                
-                {/* Legs - animated */}
                 <div className="flex justify-center gap-1 -mt-1">
                   <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[leftLeg_0.5s_ease-in-out_infinite]" />
                   <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[rightLeg_0.5s_ease-in-out_infinite]" />
@@ -360,7 +374,6 @@ const TripResults = () => {
               </div>
             </div>
             
-            {/* Floating travel icons */}
             <div className="absolute top-4 left-8 animate-[float_3s_ease-in-out_infinite]">
               <MapPin className="w-6 h-6 text-primary/60" />
             </div>
@@ -371,7 +384,6 @@ const TripResults = () => {
               <Globe className="w-5 h-5 text-primary/40" />
             </div>
             
-            {/* Dotted path ahead */}
             <div className="absolute bottom-8 right-0 flex gap-2">
               {[...Array(5)].map((_, i) => (
                 <div 
@@ -387,8 +399,8 @@ const TripResults = () => {
             <h2 className="text-2xl font-bold text-foreground">
               Crafting your perfect trip...
             </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Our AI is creating a detailed itinerary with weather forecasts, transport tips, and optimal timing. This usually takes 20-40 seconds.
+            <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+              Creating your itinerary with weather, transport, and timing. ~30 seconds.
             </p>
           </div>
         </div>
@@ -460,155 +472,112 @@ const TripResults = () => {
       </header>
 
       {/* Plan Header */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
-        <div className="text-center space-y-4 mb-8">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-            <Sparkles className="w-4 h-4" />
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-6">
+        <div className="text-center space-y-3 mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-medium">
+            <Sparkles className="w-3 h-3" />
             {plan.theme}
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">
             {plan.name}
           </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-sm max-w-xl mx-auto line-clamp-2">
             {plan.summary}
           </p>
           
-          {/* First line: Dates and Days */}
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <span className="flex items-center gap-1 bg-muted text-muted-foreground px-3 py-1.5 rounded-full">
-              <Calendar className="w-4 h-4" />
-              {new Date(plan.days[0]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {new Date(plan.days[plan.days.length - 1]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          <div className="flex items-center justify-center gap-3 text-xs">
+            <span className="flex items-center gap-1 bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+              <Calendar className="w-3 h-3" />
+              {new Date(plan.days[0]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {new Date(plan.days[plan.days.length - 1]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </span>
-            <span className="flex items-center gap-1 bg-muted text-muted-foreground px-3 py-1.5 rounded-full">
-              <Clock className="w-4 h-4" />
+            <span className="flex items-center gap-1 bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+              <Clock className="w-3 h-3" />
               {plan.days.length} days
             </span>
-          </div>
-          
-          {/* Second line: Total Cost - simplified with dark grey fill and white border */}
-          <div className="flex items-center justify-center">
-            <span className="flex items-center gap-2 bg-muted text-foreground border border-foreground/20 px-4 py-2 rounded-full text-sm font-medium">
-              <DollarSign className="w-4 h-4" />
+            <span className="flex items-center gap-1 bg-muted text-foreground border border-foreground/20 px-2.5 py-1 rounded-full font-medium">
+              <DollarSign className="w-3 h-3" />
               {plan.estimatedTotalCost.split('(')[0].trim()}
             </span>
           </div>
         </div>
 
-        {/* Flights Section */}
+        {/* Flights Section - Compact */}
         {plan.flights && (
-          <div className="bg-card rounded-xl p-5 mb-6 border border-border/50 shadow-soft">
-            <div className="flex items-center gap-2 mb-4">
-              <Plane className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Flights</h3>
+          <div className="bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft">
+            <div className="flex items-center gap-2 mb-3">
+              <Plane className="w-4 h-4 text-primary" />
+              <h3 className="font-medium text-foreground text-sm">Flights</h3>
             </div>
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Outbound Flight */}
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+            <div className="grid md:grid-cols-2 gap-3">
+              <div className="bg-muted/50 rounded-lg p-3 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-primary uppercase tracking-wide">Outbound</span>
-                  <span className="text-xs text-muted-foreground">{plan.flights.outbound.class}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">{plan.flights.outbound.airline}</span>
-                  <span className="text-xs text-muted-foreground">{plan.flights.outbound.flightNumber}</span>
+                  <span className="text-xs font-medium text-primary uppercase">Outbound</span>
+                  <span className="text-xs font-medium text-foreground">{plan.flights.outbound.estimatedCost}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-foreground">{plan.flights.outbound.departure}</span>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <ArrowRight className="w-3 h-3 text-muted-foreground" />
                   <span className="text-foreground">{plan.flights.outbound.arrival}</span>
+                  <span className="text-xs text-muted-foreground">• {plan.flights.outbound.duration}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{plan.flights.outbound.duration}</span>
-                  <span className="font-medium text-foreground">{plan.flights.outbound.estimatedCost}</span>
-                </div>
-                {plan.flights.outbound.note && (
-                  <p className="text-xs text-muted-foreground mt-2">💡 {plan.flights.outbound.note}</p>
-                )}
               </div>
-              {/* Return Flight */}
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+              <div className="bg-muted/50 rounded-lg p-3 space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-primary uppercase tracking-wide">Return</span>
-                  <span className="text-xs text-muted-foreground">{plan.flights.return.class}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">{plan.flights.return.airline}</span>
-                  <span className="text-xs text-muted-foreground">{plan.flights.return.flightNumber}</span>
+                  <span className="text-xs font-medium text-primary uppercase">Return</span>
+                  <span className="text-xs font-medium text-foreground">{plan.flights.return.estimatedCost}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-foreground">{plan.flights.return.departure}</span>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <ArrowRight className="w-3 h-3 text-muted-foreground" />
                   <span className="text-foreground">{plan.flights.return.arrival}</span>
+                  <span className="text-xs text-muted-foreground">• {plan.flights.return.duration}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{plan.flights.return.duration}</span>
-                  <span className="font-medium text-foreground">{plan.flights.return.estimatedCost}</span>
-                </div>
-                {plan.flights.return.note && (
-                  <p className="text-xs text-muted-foreground mt-2">💡 {plan.flights.return.note}</p>
-                )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Hotel Section */}
+        {/* Hotel Section - Compact */}
         {plan.hotel && (
-          <div className="bg-card rounded-xl p-5 mb-6 border border-border/50 shadow-soft">
-            <div className="flex items-center gap-2 mb-4">
-              <Hotel className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Accommodation</h3>
+          <div className="bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft">
+            <div className="flex items-center gap-2 mb-3">
+              <Hotel className="w-4 h-4 text-primary" />
+              <h3 className="font-medium text-foreground text-sm">Accommodation</h3>
             </div>
-            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+            <div className="bg-muted/50 rounded-lg p-3 space-y-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <h4 className="font-medium text-foreground text-lg">{plan.hotel.name}</h4>
-                  <div className="flex items-center gap-1 mt-1">
+                  <h4 className="font-medium text-foreground">{plan.hotel.name}</h4>
+                  <div className="flex items-center gap-1 mt-0.5">
                     {Array.from({ length: plan.hotel.starRating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                     ))}
+                    <span className="text-xs text-muted-foreground ml-1">{plan.hotel.neighborhood}</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="font-medium text-foreground">{plan.hotel.estimatedCostPerNight}</span>
-                  <span className="text-xs text-muted-foreground block">per night</span>
+                  <span className="font-medium text-foreground text-sm">{plan.hotel.totalEstimatedCost}</span>
+                  <span className="text-xs text-muted-foreground block">{plan.hotel.estimatedCostPerNight}/night</span>
                 </div>
               </div>
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                <div>
-                  <p>{plan.hotel.address}</p>
-                  <p className="text-xs">{plan.hotel.neighborhood}</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {plan.hotel.amenities.slice(0, 5).map((amenity, i) => (
-                  <span key={i} className="text-xs bg-background px-2 py-1 rounded-full border border-border/50">
+              <div className="flex flex-wrap gap-1.5">
+                {plan.hotel.amenities.slice(0, 4).map((amenity, i) => (
+                  <span key={i} className="text-xs bg-background px-2 py-0.5 rounded-full border border-border/50">
                     {amenity}
                   </span>
                 ))}
               </div>
-              <p className="text-sm text-muted-foreground">{plan.hotel.whyRecommended}</p>
-              <div className="flex items-center justify-between text-sm pt-2 border-t border-border/50">
-                <div className="flex items-center gap-4 text-muted-foreground">
-                  <span>Check-in: {plan.hotel.checkIn}</span>
-                  <span>Check-out: {plan.hotel.checkOut}</span>
-                </div>
-                <span className="font-medium text-foreground">Total: {plan.hotel.totalEstimatedCost}</span>
-              </div>
-              {plan.hotel.bookingTip && (
-                <p className="text-xs text-muted-foreground">💡 {plan.hotel.bookingTip}</p>
-              )}
             </div>
           </div>
         )}
 
         {/* Days - Accordion Style */}
-        <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-primary" />
+        <h3 className="font-medium text-foreground mb-3 flex items-center gap-2 text-sm">
+          <Calendar className="w-4 h-4 text-primary" />
           Daily Itinerary
+          <span className="text-xs text-muted-foreground font-normal">(tap any block to edit)</span>
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {plan.days.map((day) => {
             const isOpen = openDays.includes(day.dayNumber);
             const formattedDate = new Date(day.date).toLocaleDateString("en-US", {
@@ -624,27 +593,26 @@ const TripResults = () => {
                 onOpenChange={() => toggleDay(day.dayNumber)}
               >
                 <CollapsibleTrigger asChild>
-                  <button className="w-full bg-card rounded-xl p-4 shadow-soft border border-border/50 hover:border-primary/30 transition-all group">
+                  <button className="w-full bg-card rounded-xl p-3 shadow-soft border border-border/50 hover:border-primary/30 transition-all group">
                     <div className="flex items-center justify-between">
                       <div className="text-left">
-                        <h3 className="font-semibold text-primary">
+                        <h3 className="font-medium text-primary text-sm">
                           Day {day.dayNumber}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {day.blocks.length} activities planned
+                        <p className="text-xs text-muted-foreground">
+                          {day.blocks.length} activities
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-4">
-                        {/* Weather */}
+                      <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2 text-right">
                           <div className="hidden sm:block">
-                            <p className="text-sm font-medium text-foreground">
+                            <p className="text-xs font-medium text-foreground">
                               {formattedDate}
                             </p>
                             <div className="flex items-center gap-1 text-xs text-muted-foreground justify-end">
                               <Thermometer className="w-3 h-3" />
-                              {day.weather.lowTemp}° - {day.weather.highTemp}°F
+                              {day.weather.lowTemp}°-{day.weather.highTemp}°F
                             </div>
                           </div>
                           <WeatherIcon condition={day.weather.condition} />
@@ -652,51 +620,48 @@ const TripResults = () => {
 
                         <ChevronDown
                           className={cn(
-                            "w-5 h-5 text-muted-foreground transition-transform duration-200",
+                            "w-4 h-4 text-muted-foreground transition-transform duration-200",
                             isOpen && "rotate-180"
                           )}
                         />
                       </div>
                     </div>
-
-                    {/* Weather note */}
-                    {day.weather.note && (
-                      <p className="text-xs text-muted-foreground mt-2 text-left">
-                        💡 {day.weather.note}
-                      </p>
-                    )}
                   </button>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-                  <div className="pt-3 pl-6 space-y-3">
+                  <div className="pt-2 pl-4 space-y-2">
                     {day.blocks.map((block, i) => (
-                      <div
+                      <button
                         key={i}
-                        className="flex gap-4 p-4 rounded-xl bg-card border border-border/50 hover:shadow-sm transition-shadow"
+                        onClick={() => handleEditBlock(block, day.dayNumber, i)}
+                        className="w-full text-left flex gap-3 p-3 rounded-xl bg-card border border-border/50 hover:border-primary/40 hover:shadow-sm transition-all group"
                       >
-                        <div className="text-sm font-medium text-muted-foreground w-16 shrink-0">
+                        <div className="text-xs font-medium text-muted-foreground w-14 shrink-0">
                           {block.time}
                           <br />
-                          <span className="text-xs opacity-70">to {block.endTime}</span>
+                          <span className="opacity-70">{block.endTime}</span>
                         </div>
-                        <div className="flex-1 space-y-2">
+                        <div className="flex-1 min-w-0 space-y-1">
                           <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-medium text-foreground">{block.title}</h4>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full border shrink-0 ${
-                                categoryColors[block.category] || categoryColors["activity"]
-                              }`}
-                            >
-                              {block.category}
-                            </span>
+                            <h4 className="font-medium text-foreground text-sm">{block.title}</h4>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span
+                                className={`text-xs px-1.5 py-0.5 rounded-full border ${
+                                  categoryColors[block.category] || categoryColors["activity"]
+                                }`}
+                              >
+                                {block.category}
+                              </span>
+                              <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{block.description}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{block.description}</p>
 
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
-                              {block.location}
+                              <span className="truncate max-w-[120px]">{block.location}</span>
                             </span>
                             <span className="flex items-center gap-1">
                               <DollarSign className="w-3 h-3" />
@@ -704,23 +669,14 @@ const TripResults = () => {
                             </span>
                           </div>
 
-                          {/* Transport Note */}
                           {block.transportNote && (
-                            <div className="flex items-start gap-2 text-xs bg-purple-50 text-purple-700 p-2 rounded-lg">
-                              <Navigation className="w-3 h-3 mt-0.5 shrink-0" />
-                              <span>{block.transportNote}</span>
-                            </div>
-                          )}
-
-                          {/* Weather Consideration */}
-                          {block.weatherConsideration && (
-                            <div className="flex items-start gap-2 text-xs bg-blue-50 text-blue-700 p-2 rounded-lg">
-                              <Cloud className="w-3 h-3 mt-0.5 shrink-0" />
-                              <span>{block.weatherConsideration}</span>
+                            <div className="flex items-center gap-1 text-xs text-purple-600">
+                              <Navigation className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{block.transportNote}</span>
                             </div>
                           )}
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </CollapsibleContent>
@@ -730,29 +686,29 @@ const TripResults = () => {
         </div>
 
         {/* CTA - Publish Website */}
-        <div className="text-center mt-12 pb-8 space-y-4">
+        <div className="text-center mt-10 pb-8 space-y-4">
           {!publishedUrl ? (
             <Button
               size="lg"
               onClick={handlePublish}
               disabled={publishing}
-              className="px-8 py-6 text-lg rounded-xl gap-3"
+              className="px-6 py-5 text-base rounded-xl gap-2"
             >
               {publishing ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                   Publishing...
                 </>
               ) : (
                 <>
-                  <Globe className="w-5 h-5" />
+                  <Globe className="w-4 h-4" />
                   Publish Website
                 </>
               )}
             </Button>
           ) : (
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm">
                 <Check className="w-4 h-4" />
                 Website Published!
               </div>
@@ -761,14 +717,15 @@ const TripResults = () => {
                   type="text"
                   readOnly
                   value={publishedUrl}
-                  className="bg-card border border-border rounded-lg px-4 py-2 text-sm w-80 text-muted-foreground"
+                  className="bg-card border border-border rounded-lg px-3 py-1.5 text-sm w-72 text-muted-foreground"
                 />
-                <Button variant="outline" size="icon" onClick={copyToClipboard}>
+                <Button variant="outline" size="icon" onClick={copyToClipboard} className="h-9 w-9">
                   {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => window.open(publishedUrl, "_blank")}
                 className="gap-2"
               >
@@ -779,6 +736,21 @@ const TripResults = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Drawer */}
+      <EditTimeBlockDrawer
+        open={editDrawerOpen}
+        onOpenChange={setEditDrawerOpen}
+        block={editingBlock?.block || null}
+        dayNumber={editingBlock?.dayNumber || 1}
+        blockIndex={editingBlock?.blockIndex || 0}
+        destination={tripData?.destination || ""}
+        tripDates={{
+          start: tripData?.startDate || "",
+          end: tripData?.endDate || "",
+        }}
+        onSave={handleSaveBlock}
+      />
     </div>
   );
 };

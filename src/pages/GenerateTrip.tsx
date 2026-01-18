@@ -25,7 +25,7 @@ import {
   Landmark,
   UtensilsCrossed,
   Moon,
-  Sunset,
+  Sun,
   Gem,
   PiggyBank,
   type LucideIcon
@@ -42,15 +42,15 @@ type TripData = {
   specialInstructions: string;
 };
 
-const vibeOptions: { id: string; label: string; Icon: LucideIcon; color: string }[] = [
-  { id: "relaxed", label: "Relaxed & Slow", Icon: Flower2, color: "text-primary" },
-  { id: "adventure", label: "Adventure", Icon: Mountain, color: "text-accent" },
-  { id: "cultural", label: "Cultural", Icon: Landmark, color: "text-primary" },
-  { id: "foodie", label: "Foodie", Icon: UtensilsCrossed, color: "text-accent" },
-  { id: "nightlife", label: "Nightlife", Icon: Moon, color: "text-primary" },
-  { id: "nature", label: "Nature", Icon: Sunset, color: "text-accent" },
-  { id: "luxury", label: "Luxury", Icon: Gem, color: "text-primary" },
-  { id: "budget", label: "Budget-friendly", Icon: PiggyBank, color: "text-accent" },
+const vibeOptions: { id: string; label: string; Icon: LucideIcon }[] = [
+  { id: "relaxed", label: "Relaxed & Slow", Icon: Flower2 },
+  { id: "adventure", label: "Adventure", Icon: Mountain },
+  { id: "cultural", label: "Cultural", Icon: Landmark },
+  { id: "foodie", label: "Foodie", Icon: UtensilsCrossed },
+  { id: "nightlife", label: "Nightlife", Icon: Moon },
+  { id: "nature", label: "Nature", Icon: Sun },
+  { id: "luxury", label: "Luxury", Icon: Gem },
+  { id: "budget", label: "Budget-friendly", Icon: PiggyBank },
 ];
 
 const budgetOptions = [
@@ -364,7 +364,7 @@ const GenerateTrip = () => {
                       </div>
                     )}
                     <div className="flex justify-center mb-2">
-                      <IconComponent className={cn("w-8 h-8", option.color)} />
+                      <IconComponent className="w-8 h-8 text-primary" />
                     </div>
                     <div className="text-sm font-medium text-foreground">
                       {option.label}

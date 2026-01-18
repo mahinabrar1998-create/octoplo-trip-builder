@@ -163,8 +163,10 @@ CRITICAL Guidelines for DETAILED planning:
 - Create ONE comprehensive, highly detailed plan
 - ALWAYS include realistic flight recommendations based on the departure location (assume major nearby airport if not specified)
 - ALWAYS include a specific hotel recommendation that matches the budget and vibe
-- EVERY day MUST have 6-8 time blocks covering the ENTIRE day from morning (7-8 AM) to night (9-10 PM)
-- Time blocks should include: breakfast, morning activity, lunch, afternoon activity, dinner, evening activity/leisure
+- **DAY 1 MUST START AFTER FLIGHT ARRIVAL**: If the outbound flight arrives at 3:30 PM local time, Day 1 activities should begin around 4:30-5:00 PM (after customs, baggage, and transit to hotel). NEVER schedule Day 1 activities before the flight lands!
+- **LAST DAY MUST END BEFORE FLIGHT DEPARTURE**: If the return flight departs at 2:00 PM, the last day should only have morning activities ending by 11:00 AM to allow airport transit and check-in.
+- Days in the MIDDLE of the trip (not arrival or departure day) should have 6-8 time blocks covering the full day from morning (7-8 AM) to night (9-10 PM)
+- Time blocks should include: breakfast, morning activity, lunch, afternoon activity, dinner, evening activity/leisure (adjusted for arrival/departure days)
 - Consider realistic travel times between locations - account for traffic during rush hours
 - Include specific transport recommendations (walk 10 min, Uber ~$15, take Metro Line 2, etc.)
 - Base weather forecasts on typical seasonal patterns for the destination and dates
@@ -174,7 +176,8 @@ CRITICAL Guidelines for DETAILED planning:
 - Factor in rest time and buffer between activities
 - Match the budget level and group size preferences
 - Make it realistic and actionable with specific venues and addresses
-- The estimatedTotalCost should include flights, hotel, and all activities`;
+- The estimatedTotalCost should include flights, hotel, and all activities
+- All costs MUST be in US dollars ($)`;
 
 
     const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.
@@ -187,13 +190,17 @@ Trip Details:
 ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
 
 IMPORTANT Requirements:
-1. Each day MUST have 6-8 detailed time blocks from morning to night - NO GAPS in the schedule
-2. Include realistic weather forecasts based on seasonal patterns for ${destination}
-3. Consider traffic patterns (avoid scheduling across town during rush hour)
-4. Include specific transport instructions between each activity
-5. Account for opening hours and peak tourist times
-6. Name specific restaurants, attractions, and venues - not generic descriptions
-7. Include buffer time and realistic durations for each activity
+1. **FLIGHT TIMING IS CRITICAL**: 
+   - Day 1 activities MUST start AFTER the outbound flight lands (add 1-2 hours for customs/transit)
+   - Last day activities MUST end BEFORE the return flight departure (allow 3 hours for airport)
+2. Middle days (not arrival/departure) should have 6-8 detailed time blocks from morning to night
+3. Include realistic weather forecasts based on seasonal patterns for ${destination}
+4. Consider traffic patterns (avoid scheduling across town during rush hour)
+5. Include specific transport instructions between each activity
+6. Account for opening hours and peak tourist times
+7. Name specific restaurants, attractions, and venues - not generic descriptions
+8. Include buffer time and realistic durations for each activity
+9. All costs must be in US dollars ($)
 
 Generate a complete, detailed itinerary that someone could follow exactly.`;
 

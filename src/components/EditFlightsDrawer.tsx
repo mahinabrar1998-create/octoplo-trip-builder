@@ -241,7 +241,7 @@ export function EditFlightsDrawer({
           destination: destCode,
           departureDate: date,
           adults: 1,
-          maxResults: 5,
+          maxResults: 3,
         },
       });
 

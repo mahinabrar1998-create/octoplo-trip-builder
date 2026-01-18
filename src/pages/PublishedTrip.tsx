@@ -464,14 +464,14 @@ const PublishedTrip = () => {
                               </div>
                             </div>
                             <span 
-                              className="text-sm font-bold px-4 py-2 rounded-full border-2"
+                              className="text-sm font-bold px-4 py-2 rounded-full border backdrop-blur-md whitespace-nowrap"
                               style={{ 
-                                backgroundColor: "var(--theme-primary)", 
-                                color: "white",
-                                borderColor: "var(--theme-accent)"
+                                backgroundColor: "rgba(255,255,255,0.08)",
+                                borderColor: "rgba(255,255,255,0.35)",
+                                color: "rgba(255,255,255,0.95)",
                               }}
                             >
-                              <DollarSign className="w-3 h-3 inline mr-1" />
+                              <DollarSign className="w-3 h-3 inline mr-1" style={{ color: "rgba(255,255,255,0.9)" }} />
                               {block.estimatedCost}
                             </span>
                           </div>

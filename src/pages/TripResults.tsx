@@ -391,7 +391,7 @@ const TripResults = () => {
           
           {/* Second line: Total Cost - simplified with dark grey fill and white border */}
           <div className="flex items-center justify-center">
-            <span className="flex items-center gap-2 bg-zinc-800 text-white border border-white/30 px-4 py-2 rounded-full text-sm font-medium">
+            <span className="flex items-center gap-2 bg-muted text-foreground border border-foreground/20 px-4 py-2 rounded-full text-sm font-medium">
               <DollarSign className="w-4 h-4" />
               {plan.estimatedTotalCost.split('(')[0].trim()}
             </span>

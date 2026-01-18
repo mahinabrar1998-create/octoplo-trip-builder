@@ -32,6 +32,8 @@ type ThemeColors = {
   secondary: string;
   accent: string;
   gradient: string;
+  bgDark: string;
+  bgDarker: string;
 };
 
 type Weather = {
@@ -95,16 +97,79 @@ const getDestinationIcon = (destination: string) => {
   if (dest.includes("bali") || dest.includes("hawaii") || dest.includes("maldives") || dest.includes("caribbean") || dest.includes("miami") || dest.includes("beach")) {
     return <Palmtree className="w-6 h-6" />;
   }
-  if (dest.includes("alps") || dest.includes("colorado") || dest.includes("breckenridge") || dest.includes("aspen") || dest.includes("switzerland")) {
+  if (dest.includes("alps") || dest.includes("colorado") || dest.includes("breckenridge") || dest.includes("aspen") || dest.includes("switzerland") || dest.includes("ski") || dest.includes("mountain")) {
     return <Mountain className="w-6 h-6" />;
   }
-  if (dest.includes("new york") || dest.includes("london") || dest.includes("tokyo") || dest.includes("paris") || dest.includes("singapore")) {
+  if (dest.includes("new york") || dest.includes("london") || dest.includes("tokyo") || dest.includes("paris") || dest.includes("singapore") || dest.includes("san francisco")) {
     return <Building2 className="w-6 h-6" />;
   }
   if (dest.includes("iceland") || dest.includes("norway") || dest.includes("cruise")) {
     return <Waves className="w-6 h-6" />;
   }
   return <MapPin className="w-6 h-6" />;
+};
+
+// Generate theme based on destination
+const getDestinationTheme = (destination: string): ThemeColors => {
+  const dest = destination.toLowerCase();
+  
+  // Mountain/Ski destinations - cool blues and slate
+  if (dest.includes("breckenridge") || dest.includes("aspen") || dest.includes("colorado") || dest.includes("alps") || dest.includes("switzerland") || dest.includes("ski")) {
+    return {
+      primary: "210 70% 55%",
+      secondary: "210 40% 25%",
+      accent: "185 60% 50%",
+      gradient: "from-blue-500/30 via-slate-600/20 to-cyan-500/20",
+      bgDark: "215 30% 12%",
+      bgDarker: "215 35% 8%",
+    };
+  }
+  
+  // Beach/Tropical destinations - warm oranges and teals
+  if (dest.includes("bali") || dest.includes("hawaii") || dest.includes("maldives") || dest.includes("caribbean") || dest.includes("miami") || dest.includes("beach") || dest.includes("tropical")) {
+    return {
+      primary: "35 85% 55%",
+      secondary: "35 50% 25%",
+      accent: "175 60% 45%",
+      gradient: "from-amber-500/30 via-orange-600/20 to-teal-500/20",
+      bgDark: "25 25% 12%",
+      bgDarker: "25 30% 8%",
+    };
+  }
+  
+  // City destinations - sophisticated purples and golds
+  if (dest.includes("new york") || dest.includes("london") || dest.includes("tokyo") || dest.includes("paris") || dest.includes("singapore") || dest.includes("san francisco")) {
+    return {
+      primary: "260 60% 55%",
+      secondary: "260 30% 20%",
+      accent: "45 70% 55%",
+      gradient: "from-purple-500/30 via-indigo-600/20 to-amber-500/20",
+      bgDark: "260 25% 12%",
+      bgDarker: "260 30% 8%",
+    };
+  }
+  
+  // Nordic/Cold destinations - aurora greens and deep blues
+  if (dest.includes("iceland") || dest.includes("norway") || dest.includes("finland") || dest.includes("arctic") || dest.includes("northern")) {
+    return {
+      primary: "160 60% 45%",
+      secondary: "160 40% 20%",
+      accent: "280 50% 60%",
+      gradient: "from-emerald-500/30 via-teal-600/20 to-purple-500/20",
+      bgDark: "200 30% 10%",
+      bgDarker: "200 35% 6%",
+    };
+  }
+  
+  // Default - elegant slate and teal
+  return {
+    primary: "180 50% 50%",
+    secondary: "180 30% 20%",
+    accent: "180 60% 60%",
+    gradient: "from-teal-500/30 via-slate-600/20 to-cyan-500/20",
+    bgDark: "220 25% 12%",
+    bgDarker: "220 30% 8%",
+  };
 };
 
 const WeatherIcon = ({ condition, className }: { condition: Weather["condition"]; className?: string }) => {
@@ -115,7 +180,7 @@ const WeatherIcon = ({ condition, className }: { condition: Weather["condition"]
     case "partly-cloudy":
       return <CloudSun className={iconClass} style={{ color: "var(--theme-accent)" }} />;
     case "cloudy":
-      return <Cloud className={cn(iconClass, "text-gray-400")} />;
+      return <Cloud className={cn(iconClass, "text-slate-400")} />;
     case "rainy":
       return <CloudRain className={cn(iconClass, "text-blue-400")} />;
     case "stormy":
@@ -127,14 +192,6 @@ const WeatherIcon = ({ condition, className }: { condition: Weather["condition"]
     default:
       return <Sun className={iconClass} style={{ color: "var(--theme-accent)" }} />;
   }
-};
-
-// Default theme for trips without theme_colors
-const defaultTheme: ThemeColors = {
-  primary: "20 80% 55%",
-  secondary: "20 30% 95%",
-  accent: "180 60% 45%",
-  gradient: "from-orange-400/20 via-amber-300/10 to-teal-400/20",
 };
 
 const PublishedTrip = () => {
@@ -175,7 +232,7 @@ const PublishedTrip = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 text-white animate-spin mx-auto" />
           <p className="text-white/70">Loading your trip...</p>
@@ -186,7 +243,7 @@ const PublishedTrip = () => {
 
   if (error || !tripData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center space-y-4 p-8">
           <div className="text-6xl">🗺️</div>
           <h1 className="text-2xl font-bold text-white">Trip Not Found</h1>
@@ -197,7 +254,8 @@ const PublishedTrip = () => {
   }
 
   const { plan, destination, start_date, end_date, hero_image_url, theme_colors } = tripData;
-  const theme = theme_colors || defaultTheme;
+  // Use stored theme or generate based on destination
+  const theme = theme_colors || getDestinationTheme(destination);
   const startDate = new Date(start_date);
   const endDate = new Date(end_date);
   const tripDuration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -207,112 +265,117 @@ const PublishedTrip = () => {
     "--theme-primary": `hsl(${theme.primary})`,
     "--theme-secondary": `hsl(${theme.secondary})`,
     "--theme-accent": `hsl(${theme.accent})`,
+    "--theme-bg-dark": `hsl(${theme.bgDark || "220 25% 12%"})`,
+    "--theme-bg-darker": `hsl(${theme.bgDarker || "220 30% 8%"})`,
   } as React.CSSProperties;
 
   return (
     <div className="min-h-screen" style={themeStyle}>
-      {/* Hero Section with destination-themed styling */}
-      <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
+      {/* Hero Section with gradient fade into dark background */}
+      <div className="relative h-[80vh] min-h-[600px] overflow-hidden">
+        {/* Hero Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center scale-105"
+          className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url(${hero_image_url})`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/80" />
         
-        {/* Themed floating decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div 
-            className={cn("absolute top-20 left-10 w-40 h-40 rounded-full blur-3xl animate-pulse opacity-40", `bg-gradient-to-r ${theme.gradient}`)} 
-          />
-          <div 
-            className={cn("absolute bottom-40 right-10 w-56 h-56 rounded-full blur-3xl animate-pulse opacity-30", `bg-gradient-to-r ${theme.gradient}`)}
-            style={{ animationDelay: "1s" }} 
-          />
-          <div 
-            className={cn("absolute top-1/2 left-1/4 w-32 h-32 rounded-full blur-3xl animate-pulse opacity-20", `bg-gradient-to-r ${theme.gradient}`)}
-            style={{ animationDelay: "2s" }} 
-          />
-        </div>
+        {/* Gradient overlay - fades image into dark background */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(to bottom, 
+              transparent 0%, 
+              transparent 20%,
+              rgba(0,0,0,0.2) 40%,
+              rgba(0,0,0,0.5) 60%,
+              var(--theme-bg-darker) 85%,
+              var(--theme-bg-darker) 100%
+            )`,
+          }}
+        />
+        
+        {/* Side gradient for extra depth */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse at center top, transparent 0%, var(--theme-bg-darker) 100%)`,
+            opacity: 0.4,
+          }}
+        />
 
-        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
+        {/* Content */}
+        <div className="relative z-10 h-full flex flex-col items-center justify-end text-center px-4 pb-16">
           {/* Destination icon */}
           <div 
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 backdrop-blur-sm"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 backdrop-blur-sm border border-white/20"
             style={{ backgroundColor: "var(--theme-primary)", color: "white" }}
           >
             {getDestinationIcon(destination)}
           </div>
           
           <div 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-4 backdrop-blur-sm text-white"
-            style={{ backgroundColor: "var(--theme-primary)" }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-4 backdrop-blur-sm text-white border border-white/10"
+            style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4" style={{ color: "var(--theme-accent)" }} />
             {plan.theme}
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-2xl tracking-tight">
             {destination}
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl drop-shadow-md font-light">
+          <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-2xl drop-shadow-md font-light">
             {plan.summary}
           </p>
           
-          <div className="flex flex-wrap items-center justify-center gap-4 text-white/90">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-white/90">
             <span 
-              className="flex items-center gap-2 backdrop-blur-sm px-5 py-3 rounded-full font-medium"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+              className="flex items-center gap-2 backdrop-blur-md px-5 py-3 rounded-full font-medium border border-white/10"
+              style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
             >
-              <Calendar className="w-5 h-5" />
+              <Calendar className="w-5 h-5" style={{ color: "var(--theme-accent)" }} />
               {startDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
             </span>
             <span 
-              className="flex items-center gap-2 backdrop-blur-sm px-5 py-3 rounded-full font-medium"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+              className="flex items-center gap-2 backdrop-blur-md px-5 py-3 rounded-full font-medium border border-white/10"
+              style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
             >
-              <Clock className="w-5 h-5" />
+              <Clock className="w-5 h-5" style={{ color: "var(--theme-accent)" }} />
               {tripDuration} days
             </span>
             <span 
-              className="flex items-center gap-2 backdrop-blur-sm px-5 py-3 rounded-full font-medium"
-              style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+              className="flex items-center gap-2 backdrop-blur-md px-5 py-3 rounded-full font-medium border border-white/10"
+              style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
             >
-              <DollarSign className="w-5 h-5" />
+              <DollarSign className="w-5 h-5" style={{ color: "var(--theme-accent)" }} />
               {plan.estimatedTotalCost}
             </span>
           </div>
         </div>
-        
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 rounded-full border-2 border-white/50 flex items-start justify-center p-2">
-            <div className="w-1.5 h-3 rounded-full bg-white/70 animate-pulse" />
-          </div>
-        </div>
       </div>
 
-      {/* Main content with themed background */}
+      {/* Main content with dark themed background */}
       <div 
-        className={cn("bg-gradient-to-b", theme.gradient, "min-h-screen")}
-        style={{ backgroundColor: "var(--theme-secondary)" }}
+        className="min-h-screen"
+        style={{ backgroundColor: "var(--theme-bg-darker)" }}
       >
         <div className="max-w-4xl mx-auto px-4 py-16">
           {/* Highlights Section */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-6" style={{ color: "hsl(220, 20%, 20%)" }}>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-8 text-white">
               Trip Highlights
             </h2>
             <div className="flex flex-wrap justify-center gap-3">
               {plan.highlights.map((highlight, i) => (
                 <span
                   key={i}
-                  className="px-5 py-2.5 rounded-full text-sm font-medium shadow-sm"
+                  className="px-5 py-2.5 rounded-full text-sm font-medium border"
                   style={{ 
-                    backgroundColor: "white",
-                    color: "var(--theme-primary)",
-                    border: "2px solid var(--theme-primary)"
+                    backgroundColor: "rgba(255,255,255,0.05)",
+                    color: "var(--theme-accent)",
+                    borderColor: "var(--theme-primary)"
                   }}
                 >
                   ✨ {highlight}
@@ -324,13 +387,13 @@ const PublishedTrip = () => {
           {/* Packing Tips */}
           {plan.packingTips && plan.packingTips.length > 0 && (
             <div 
-              className="rounded-2xl p-6 mb-12 shadow-lg"
-              style={{ backgroundColor: "white" }}
+              className="rounded-2xl p-6 mb-16 border"
+              style={{ 
+                backgroundColor: "rgba(255,255,255,0.03)",
+                borderColor: "rgba(255,255,255,0.1)"
+              }}
             >
-              <h3 
-                className="font-semibold mb-4 flex items-center gap-2 text-lg"
-                style={{ color: "hsl(220, 20%, 20%)" }}
-              >
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-white">
                 <span className="text-2xl">🎒</span> What to Pack
               </h3>
               <div className="flex flex-wrap gap-2">
@@ -340,7 +403,7 @@ const PublishedTrip = () => {
                     className="px-4 py-2 rounded-full text-sm font-medium"
                     style={{ 
                       backgroundColor: "var(--theme-secondary)",
-                      color: "hsl(220, 20%, 30%)"
+                      color: "rgba(255,255,255,0.8)"
                     }}
                   >
                     {tip}
@@ -352,10 +415,7 @@ const PublishedTrip = () => {
 
           {/* Daily Itinerary */}
           <div className="space-y-10">
-            <h2 
-              className="text-3xl font-bold text-center mb-10"
-              style={{ color: "hsl(220, 20%, 20%)" }}
-            >
+            <h2 className="text-3xl font-bold text-center mb-10 text-white">
               Daily Itinerary
             </h2>
             
@@ -371,8 +431,11 @@ const PublishedTrip = () => {
                 <div key={day.dayNumber} className="relative">
                   {/* Day Header */}
                   <div 
-                    className="sticky top-0 z-20 backdrop-blur-md py-4 mb-6 rounded-xl px-4 shadow-sm"
-                    style={{ backgroundColor: "rgba(255,255,255,0.9)" }}
+                    className="sticky top-0 z-20 backdrop-blur-xl py-4 mb-6 rounded-xl px-4 border"
+                    style={{ 
+                      backgroundColor: "rgba(0,0,0,0.7)",
+                      borderColor: "rgba(255,255,255,0.1)"
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -383,27 +446,36 @@ const PublishedTrip = () => {
                           {day.dayNumber}
                         </div>
                         <div>
-                          <h3 className="font-bold text-xl" style={{ color: "hsl(220, 20%, 20%)" }}>
+                          <h3 className="font-bold text-xl text-white">
                             Day {day.dayNumber}
                           </h3>
-                          <p className="text-gray-500">{formattedDate}</p>
+                          <p className="text-white/60">{formattedDate}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-200 shadow-sm">
+                      <div 
+                        className="flex items-center gap-3 px-4 py-2 rounded-xl border"
+                        style={{ 
+                          backgroundColor: "rgba(255,255,255,0.05)",
+                          borderColor: "rgba(255,255,255,0.1)"
+                        }}
+                      >
                         <WeatherIcon condition={day.weather.condition} className="w-6 h-6" />
                         <div className="text-right">
-                          <div className="flex items-center gap-1 text-sm font-medium" style={{ color: "hsl(220, 20%, 20%)" }}>
+                          <div className="flex items-center gap-1 text-sm font-medium text-white">
                             <Thermometer className="w-3 h-3" />
                             {day.weather.lowTemp}° - {day.weather.highTemp}°F
                           </div>
-                          <p className="text-xs text-gray-500 capitalize">{day.weather.condition.replace("-", " ")}</p>
+                          <p className="text-xs text-white/60 capitalize">{day.weather.condition.replace("-", " ")}</p>
                         </div>
                       </div>
                     </div>
                     {day.weather.note && (
                       <p 
                         className="mt-3 text-sm px-4 py-2 rounded-lg"
-                        style={{ backgroundColor: "var(--theme-secondary)", color: "hsl(220, 20%, 30%)" }}
+                        style={{ 
+                          backgroundColor: "var(--theme-secondary)", 
+                          color: "rgba(255,255,255,0.8)" 
+                        }}
                       >
                         💡 {day.weather.note}
                       </p>
@@ -422,22 +494,34 @@ const PublishedTrip = () => {
                       >
                         {/* Timeline dot */}
                         <div 
-                          className="absolute left-0 top-0 w-4 h-4 -translate-x-[10px] rounded-full border-4 border-white shadow-md"
-                          style={{ backgroundColor: "var(--theme-primary)" }}
+                          className="absolute left-0 top-0 w-4 h-4 -translate-x-[10px] rounded-full border-4 shadow-md"
+                          style={{ 
+                            backgroundColor: "var(--theme-primary)",
+                            borderColor: "var(--theme-bg-darker)"
+                          }}
                         />
                         
-                        <div className="bg-white rounded-xl p-5 shadow-md hover:shadow-lg transition-all border border-gray-100">
+                        <div 
+                          className="rounded-xl p-5 border transition-all hover:border-opacity-50"
+                          style={{ 
+                            backgroundColor: "rgba(255,255,255,0.03)",
+                            borderColor: "rgba(255,255,255,0.1)"
+                          }}
+                        >
                           <div className="flex items-start justify-between gap-4 mb-3">
                             <div className="flex items-center gap-3">
                               <div 
                                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                style={{ backgroundColor: "var(--theme-secondary)", color: "var(--theme-primary)" }}
+                                style={{ 
+                                  backgroundColor: "var(--theme-secondary)", 
+                                  color: "var(--theme-accent)" 
+                                }}
                               >
                                 {categoryIcons[block.category] || <Sparkles className="w-4 h-4" />}
                               </div>
                               <div>
-                                <h4 className="font-semibold" style={{ color: "hsl(220, 20%, 20%)" }}>{block.title}</h4>
-                                <p className="text-sm text-gray-500 flex items-center gap-1">
+                                <h4 className="font-semibold text-white">{block.title}</h4>
+                                <p className="text-sm text-white/50 flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
                                   {block.time} - {block.endTime}
                                 </p>
@@ -445,31 +529,43 @@ const PublishedTrip = () => {
                             </div>
                             <span 
                               className="text-sm font-medium px-3 py-1 rounded-full"
-                              style={{ backgroundColor: "var(--theme-secondary)", color: "var(--theme-primary)" }}
+                              style={{ 
+                                backgroundColor: "var(--theme-secondary)", 
+                                color: "var(--theme-accent)" 
+                              }}
                             >
                               {block.estimatedCost}
                             </span>
                           </div>
 
-                          <p className="text-gray-600 mb-3">{block.description}</p>
+                          <p className="text-white/70 mb-3">{block.description}</p>
 
-                          <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                            <MapPin className="w-4 h-4" style={{ color: "var(--theme-primary)" }} />
+                          <div className="flex items-center gap-2 text-sm text-white/50 mb-3">
+                            <MapPin className="w-4 h-4" style={{ color: "var(--theme-accent)" }} />
                             <span>{block.location}</span>
                           </div>
 
                           {block.transportNote && (
                             <div 
                               className="flex items-start gap-2 text-sm p-3 rounded-lg mb-2"
-                              style={{ backgroundColor: "var(--theme-secondary)", color: "hsl(220, 20%, 30%)" }}
+                              style={{ 
+                                backgroundColor: "var(--theme-secondary)", 
+                                color: "rgba(255,255,255,0.7)" 
+                              }}
                             >
-                              <Navigation className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--theme-primary)" }} />
+                              <Navigation className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--theme-accent)" }} />
                               <span>{block.transportNote}</span>
                             </div>
                           )}
 
                           {block.weatherConsideration && (
-                            <div className="flex items-start gap-2 text-sm bg-blue-50 text-blue-800 p-3 rounded-lg">
+                            <div 
+                              className="flex items-start gap-2 text-sm p-3 rounded-lg"
+                              style={{ 
+                                backgroundColor: "rgba(59, 130, 246, 0.1)", 
+                                color: "rgb(147, 197, 253)" 
+                              }}
+                            >
                               <Cloud className="w-4 h-4 mt-0.5 shrink-0" />
                               <span>{block.weatherConsideration}</span>
                             </div>
@@ -485,17 +581,16 @@ const PublishedTrip = () => {
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - subtle, matches theme */}
       <footer 
-        className="py-10"
-        style={{ backgroundColor: "hsl(220, 20%, 15%)" }}
+        className="py-10 border-t"
+        style={{ 
+          backgroundColor: "var(--theme-bg-darker)",
+          borderColor: "rgba(255,255,255,0.05)"
+        }}
       >
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 text-white mb-3">
-            <Sparkles className="w-5 h-5" style={{ color: "var(--theme-accent)" }} />
-            <span className="font-semibold text-lg">Powered by Octoplo</span>
-          </div>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-white/40">
             AI-crafted travel itinerary • Share the adventure
           </p>
         </div>

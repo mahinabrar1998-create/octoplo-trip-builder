@@ -331,11 +331,54 @@ const TripResults = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background relative flex items-center justify-center">
+      <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
         <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          {/* Fun Climber Animation */}
+          <div className="relative w-48 h-64 mx-auto">
+            {/* Mountain */}
+            <svg viewBox="0 0 200 260" className="w-full h-full">
+              {/* Mountain Background */}
+              <polygon 
+                points="100,20 180,240 20,240" 
+                className="fill-muted stroke-border" 
+                strokeWidth="2"
+              />
+              {/* Snow Cap */}
+              <polygon 
+                points="100,20 130,80 70,80" 
+                className="fill-background stroke-border" 
+                strokeWidth="1"
+              />
+              {/* Mountain Path (dotted line) */}
+              <path 
+                d="M 40,220 Q 60,180 80,160 Q 100,140 90,110 Q 85,90 100,60" 
+                fill="none" 
+                className="stroke-primary/40" 
+                strokeWidth="2" 
+                strokeDasharray="4 4"
+              />
+              {/* Climber */}
+              <g className="animate-[climb_3s_ease-in-out_infinite]">
+                {/* Body */}
+                <circle cx="0" cy="0" r="8" className="fill-primary" />
+                {/* Backpack */}
+                <rect x="4" y="-4" width="8" height="12" rx="2" className="fill-primary/80" />
+                {/* Legs */}
+                <line x1="-2" y1="8" x2="-5" y2="16" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+                <line x1="2" y1="8" x2="5" y2="16" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+                {/* Arms */}
+                <line x1="-6" y1="2" x2="-10" y2="-4" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+                <line x1="3" y1="2" x2="8" y2="6" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+                {/* Walking stick */}
+                <line x1="8" y1="6" x2="14" y2="18" className="stroke-foreground/60" strokeWidth="1.5" strokeLinecap="round" />
+              </g>
+              {/* Flag at peak */}
+              <g>
+                <line x1="100" y1="20" x2="100" y2="5" className="stroke-foreground" strokeWidth="1.5" />
+                <polygon points="100,5 115,10 100,15" className="fill-primary animate-[wave_1s_ease-in-out_infinite]" />
+              </g>
+            </svg>
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-foreground">
@@ -345,11 +388,19 @@ const TripResults = () => {
               Our AI is creating a detailed itinerary with weather forecasts, transport tips, and optimal timing. This usually takes 20-40 seconds.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span>Powered by Gemini</span>
-          </div>
         </div>
+        <style>{`
+          @keyframes climb {
+            0%, 100% { transform: translate(50px, 200px); }
+            25% { transform: translate(70px, 165px); }
+            50% { transform: translate(88px, 125px); }
+            75% { transform: translate(92px, 95px); }
+          }
+          @keyframes wave {
+            0%, 100% { transform: skewY(0deg); }
+            50% { transform: skewY(5deg); }
+          }
+        `}</style>
       </div>
     );
   }

@@ -156,7 +156,7 @@ export function EditHotelDrawer({
       starRating: hotelResult.rating || 3,
       estimatedCostPerNight: hotelResult.pricePerNight,
       totalEstimatedCost: hotelResult.totalPrice,
-      amenities: hotelResult.amenities.length > 0 ? hotelResult.amenities : editedHotel.amenities,
+      amenities: hotelResult.amenities,
       whyRecommended: hotelResult.roomType || "Real-time pricing from Amadeus",
       checkIn: tripDates.start,
       checkOut: tripDates.end,
@@ -404,13 +404,13 @@ export function EditHotelDrawer({
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs">Why Recommended</Label>
+                <Label className="text-xs">Room Details</Label>
                 <Textarea
                   value={editedHotel.whyRecommended}
                   onChange={(e) => setEditedHotel({ ...editedHotel, whyRecommended: e.target.value })}
                   rows={2}
                   className="resize-none text-sm"
-                  placeholder="e.g., Great location near attractions"
+                  placeholder="e.g., Queen Bed, Ocean View"
                 />
               </div>
             </div>

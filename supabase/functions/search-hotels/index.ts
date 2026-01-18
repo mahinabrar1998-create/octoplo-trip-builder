@@ -289,8 +289,17 @@ serve(async (req) => {
       // Combine room description
       const roomDescription = [roomType, formattedBedType].filter(Boolean).join(" • ") || null;
 
+      // Clean hotel name - remove airport codes like "LAX", "NYC", etc.
+      let cleanName = hotel.name || "";
+      // Remove common patterns like "- LAX" or "(LAX)" or "LAX -" from hotel names
+      cleanName = cleanName.replace(/\s*[-–]\s*[A-Z]{3}\s*/g, " ")
+                           .replace(/\s*\([A-Z]{3}\)\s*/g, " ")
+                           .replace(/\s*[A-Z]{3}\s*[-–]\s*/g, " ")
+                           .replace(/\s+/g, " ")
+                           .trim();
+
       return {
-        name: hotel.name,
+        name: cleanName,
         hotelId: hotel.hotelId,
         address: hotel.address?.lines?.join(", ") || "",
         cityName: hotel.cityCode || cityCode,
@@ -299,7 +308,7 @@ serve(async (req) => {
         totalPrice: `$${price?.total || "N/A"}`,
         currency: price?.currency || "USD",
         roomType: roomDescription,
-        amenities: hotel.amenities || [],
+        amenities: hotel.amenities?.length > 0 ? hotel.amenities : [],
         checkInTime: bestOffer?.checkInDate || checkInDate,
         checkOutTime: bestOffer?.checkOutDate || checkOutDate,
         cancellationPolicy: bestOffer?.policies?.cancellation?.description?.text || "Check hotel policy",

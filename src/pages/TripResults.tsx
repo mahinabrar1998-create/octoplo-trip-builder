@@ -453,7 +453,7 @@ const TripResults = () => {
 
                     {/* Weather note */}
                     {day.weather.note && (
-                      <p className="text-xs text-muted-foreground mt-2 text-left pl-16">
+                      <p className="text-xs text-muted-foreground mt-2 text-left">
                         💡 {day.weather.note}
                       </p>
                     )}

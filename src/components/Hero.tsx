@@ -13,9 +13,7 @@ const Hero = () => {
         </h1>
 
         {/* Subheadline */}
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-balance leading-relaxed">
-          One shared place to plan, decide, and remember your trip — with or without AI.
-        </p>
+        
       </div>
     </section>;
 };

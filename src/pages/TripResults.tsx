@@ -32,6 +32,7 @@ import {
   Star,
   ArrowRight,
   Pencil,
+  Luggage,
 } from "lucide-react";
 import SoothingGradient from "@/components/SoothingGradient";
 import { supabase } from "@/integrations/supabase/client";
@@ -497,7 +498,7 @@ const TripResults = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
             {plan.name}
           </h1>
-          <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="text-muted-foreground text-sm max-w-xl mx-auto line-clamp-2">
             {plan.summary}
           </p>
           
@@ -513,7 +514,6 @@ const TripResults = () => {
             <span className="flex items-center gap-1 bg-muted text-foreground border border-foreground/20 px-2.5 py-1 rounded-full font-medium">
               {(() => {
                 const cost = plan.estimatedTotalCost.split('(')[0].trim();
-                // Remove leading $ if present to avoid duplication with icon
                 const cleanCost = cost.startsWith('$') ? cost.substring(1).trim() : cost;
                 return (
                   <>
@@ -525,6 +525,23 @@ const TripResults = () => {
             </span>
           </div>
         </div>
+
+        {/* Packing Tips */}
+        {plan.packingTips && plan.packingTips.length > 0 && (
+          <div className="bg-card rounded-xl p-4 mb-4 border border-border/50 shadow-soft">
+            <div className="flex items-center gap-2 mb-2">
+              <Luggage className="w-4 h-4 text-primary" />
+              <h3 className="font-medium text-foreground text-sm">Packing Tips</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {plan.packingTips.slice(0, 4).map((tip, i) => (
+                <span key={i} className="text-xs bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+                  {tip}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Flights Section - Compact & Clickable */}
         {plan.flights && (

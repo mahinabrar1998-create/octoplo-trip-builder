@@ -679,41 +679,49 @@ const TripResults = () => {
                         }
                       })();
 
-                      // Smart cost display: show $ icon only for "Free", not for values that already have $
-                      const costDisplay = (() => {
-                        const cost = block.estimatedCost.trim().toLowerCase();
-                        if (cost === 'free' || cost === '0' || cost === '$0') {
-                          return { showIcon: true, text: 'Free' };
+                      // Format cost to always show in dollars
+                      const formatCostInDollars = (cost: string): string => {
+                        const trimmed = cost.trim().toLowerCase();
+                        if (trimmed === 'free' || trimmed === '0' || trimmed === '$0') {
+                          return 'Free';
                         }
-                        // If already has $ sign, don't show icon
-                        if (block.estimatedCost.includes('$')) {
-                          return { showIcon: false, text: block.estimatedCost };
+                        // Remove existing currency symbols and clean up
+                        let cleanCost = cost.replace(/[€£¥₹₩฿]/g, '').trim();
+                        // If already has $ sign, just return it
+                        if (cleanCost.startsWith('$')) {
+                          return cleanCost;
                         }
-                        return { showIcon: true, text: block.estimatedCost };
-                      })();
+                        // Add $ if it's just a number or range
+                        if (/^\d/.test(cleanCost)) {
+                          return `$${cleanCost}`;
+                        }
+                        return cleanCost;
+                      };
+
+                      const formattedCost = formatCostInDollars(block.estimatedCost);
+                      const isFree = formattedCost.toLowerCase() === 'free';
 
                       return (
                         <button
                           key={i}
                           onClick={() => handleEditBlock(block, day.dayNumber, i)}
                           className={cn(
-                            "w-full text-left flex gap-3 p-3 rounded-xl bg-card border hover:border-primary/40 hover:shadow-sm transition-all group",
+                            "w-full text-left flex gap-3 p-4 pr-6 rounded-xl bg-card border hover:border-primary/40 hover:shadow-sm transition-all group",
                             hasOverlap ? "border-red-300" : "border-border/50"
                           )}
                         >
                           <div className="text-xs font-medium text-muted-foreground w-14 shrink-0">
-                            {block.time}
-                            <br />
-                            <span className="opacity-70">{block.endTime}</span>
+                            <span className="block">{block.time}</span>
+                            <span className="block opacity-70 mt-0.5">{block.endTime}</span>
                             {hasOverlap && (
                               <div className="mt-1 text-[10px] text-red-500 font-medium">
                                 ⚠ Overlap
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <h4 className="font-medium text-foreground text-sm">{block.title}</h4>
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-start justify-between gap-3">
+                              <h4 className="font-medium text-foreground text-sm leading-snug">{block.title}</h4>
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <span
                                   className={`text-xs px-1.5 py-0.5 rounded-full border ${
@@ -725,23 +733,24 @@ const TripResults = () => {
                                 <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
                             </div>
-                            <p className="text-xs text-muted-foreground">{block.description}</p>
+                            
+                            <p className="text-xs text-muted-foreground leading-relaxed">{block.description}</p>
 
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
                               <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                <span className="truncate max-w-[120px]">{block.location}</span>
+                                <MapPin className="w-3 h-3 shrink-0" />
+                                <span>{block.location}</span>
                               </span>
                               <span className="flex items-center gap-1">
-                                {costDisplay.showIcon && <DollarSign className="w-3 h-3" />}
-                                {costDisplay.text}
+                                {isFree && <DollarSign className="w-3 h-3" />}
+                                {formattedCost}
                               </span>
                             </div>
 
                             {block.transportNote && (
-                              <div className="flex items-center gap-1 text-xs text-purple-600">
+                              <div className="flex items-center gap-1.5 text-xs text-purple-600 pt-1">
                                 <Navigation className="w-3 h-3 shrink-0" />
-                                <span className="truncate">{block.transportNote}</span>
+                                <span>{block.transportNote}</span>
                               </div>
                             )}
                           </div>

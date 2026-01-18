@@ -39,8 +39,7 @@ type RealHotelResult = {
   pricePerNight: string;
   totalPrice: string;
   currency: string;
-  roomType?: string;
-  bedType?: string;
+  roomType?: string | null;
   amenities: string[];
   cancellationPolicy?: string;
   source: string;
@@ -158,9 +157,7 @@ export function EditHotelDrawer({
       estimatedCostPerNight: hotelResult.pricePerNight,
       totalEstimatedCost: hotelResult.totalPrice,
       amenities: hotelResult.amenities.length > 0 ? hotelResult.amenities : editedHotel.amenities,
-      whyRecommended: hotelResult.roomType 
-        ? `${hotelResult.roomType}${hotelResult.bedType ? ` with ${hotelResult.bedType}` : ""}`
-        : "Real-time pricing from Amadeus",
+      whyRecommended: hotelResult.roomType || "Real-time pricing from Amadeus",
       checkIn: tripDates.start,
       checkOut: tripDates.end,
       bookingTip: hotelResult.cancellationPolicy || `${nights} night stay`,

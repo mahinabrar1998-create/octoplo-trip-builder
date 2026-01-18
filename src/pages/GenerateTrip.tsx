@@ -20,6 +20,14 @@ import {
   User,
   Heart,
   Users2,
+  Flower2,
+  Mountain,
+  Landmark,
+  UtensilsCrossed,
+  Moon,
+  Sunset,
+  Gem,
+  PiggyBank,
   type LucideIcon
 } from "lucide-react";
 import SoothingGradient from "@/components/SoothingGradient";
@@ -34,15 +42,15 @@ type TripData = {
   specialInstructions: string;
 };
 
-const vibeOptions = [
-  { id: "relaxed", label: "Relaxed & Slow", emoji: "🧘" },
-  { id: "adventure", label: "Adventure", emoji: "🏔️" },
-  { id: "cultural", label: "Cultural", emoji: "🏛️" },
-  { id: "foodie", label: "Foodie", emoji: "🍜" },
-  { id: "nightlife", label: "Nightlife", emoji: "🌙" },
-  { id: "nature", label: "Nature", emoji: "🌿" },
-  { id: "luxury", label: "Luxury", emoji: "✨" },
-  { id: "budget", label: "Budget-friendly", emoji: "💰" },
+const vibeOptions: { id: string; label: string; Icon: LucideIcon; color: string }[] = [
+  { id: "relaxed", label: "Relaxed & Slow", Icon: Flower2, color: "text-primary" },
+  { id: "adventure", label: "Adventure", Icon: Mountain, color: "text-accent" },
+  { id: "cultural", label: "Cultural", Icon: Landmark, color: "text-primary" },
+  { id: "foodie", label: "Foodie", Icon: UtensilsCrossed, color: "text-accent" },
+  { id: "nightlife", label: "Nightlife", Icon: Moon, color: "text-primary" },
+  { id: "nature", label: "Nature", Icon: Sunset, color: "text-accent" },
+  { id: "luxury", label: "Luxury", Icon: Gem, color: "text-primary" },
+  { id: "budget", label: "Budget-friendly", Icon: PiggyBank, color: "text-accent" },
 ];
 
 const budgetOptions = [
@@ -337,28 +345,33 @@ const GenerateTrip = () => {
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
-              {vibeOptions.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => toggleVibe(option.id)}
-                  className={cn(
-                    "p-4 rounded-xl border-2 text-center transition-all hover:border-primary relative",
-                    tripData.vibe.includes(option.id)
-                      ? "border-primary bg-primary/10"
-                      : "border-border"
-                  )}
-                >
-                  {tripData.vibe.includes(option.id) && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="h-4 w-4 text-primary" />
+              {vibeOptions.map((option) => {
+                const IconComponent = option.Icon;
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => toggleVibe(option.id)}
+                    className={cn(
+                      "p-4 rounded-xl border-2 text-center transition-all hover:border-primary relative",
+                      tripData.vibe.includes(option.id)
+                        ? "border-primary bg-primary/10"
+                        : "border-border"
+                    )}
+                  >
+                    {tripData.vibe.includes(option.id) && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="h-4 w-4 text-primary" />
+                      </div>
+                    )}
+                    <div className="flex justify-center mb-2">
+                      <IconComponent className={cn("w-8 h-8", option.color)} />
                     </div>
-                  )}
-                  <div className="text-2xl mb-1">{option.emoji}</div>
-                  <div className="text-sm font-medium text-foreground">
-                    {option.label}
-                  </div>
-                </button>
-              ))}
+                    <div className="text-sm font-medium text-foreground">
+                      {option.label}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         );

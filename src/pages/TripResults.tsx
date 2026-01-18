@@ -27,6 +27,10 @@ import {
   Globe,
   Check,
   Copy,
+  Plane,
+  Hotel,
+  Star,
+  ArrowRight,
 } from "lucide-react";
 import SoothingGradient from "@/components/SoothingGradient";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,10 +63,42 @@ type Day = {
   blocks: TimeBlock[];
 };
 
+type FlightInfo = {
+  airline: string;
+  flightNumber: string;
+  departure: string;
+  arrival: string;
+  duration: string;
+  estimatedCost: string;
+  class: string;
+  note: string;
+};
+
+type Flights = {
+  outbound: FlightInfo;
+  return: FlightInfo;
+};
+
+type Hotel = {
+  name: string;
+  address: string;
+  neighborhood: string;
+  starRating: number;
+  estimatedCostPerNight: string;
+  totalEstimatedCost: string;
+  amenities: string[];
+  whyRecommended: string;
+  checkIn: string;
+  checkOut: string;
+  bookingTip: string;
+};
+
 type TripPlan = {
   name: string;
   theme: string;
   summary: string;
+  flights?: Flights;
+  hotel?: Hotel;
   days: Day[];
   estimatedTotalCost: string;
   highlights: string[];
@@ -398,8 +434,120 @@ const TripResults = () => {
           </div>
         </div>
 
+        {/* Flights Section */}
+        {plan.flights && (
+          <div className="bg-card rounded-xl p-5 mb-6 border border-border/50 shadow-soft">
+            <div className="flex items-center gap-2 mb-4">
+              <Plane className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Flights</h3>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {/* Outbound Flight */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-primary uppercase tracking-wide">Outbound</span>
+                  <span className="text-xs text-muted-foreground">{plan.flights.outbound.class}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-foreground">{plan.flights.outbound.airline}</span>
+                  <span className="text-xs text-muted-foreground">{plan.flights.outbound.flightNumber}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-foreground">{plan.flights.outbound.departure}</span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground">{plan.flights.outbound.arrival}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{plan.flights.outbound.duration}</span>
+                  <span className="font-medium text-foreground">{plan.flights.outbound.estimatedCost}</span>
+                </div>
+                {plan.flights.outbound.note && (
+                  <p className="text-xs text-muted-foreground mt-2">💡 {plan.flights.outbound.note}</p>
+                )}
+              </div>
+              {/* Return Flight */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-primary uppercase tracking-wide">Return</span>
+                  <span className="text-xs text-muted-foreground">{plan.flights.return.class}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-foreground">{plan.flights.return.airline}</span>
+                  <span className="text-xs text-muted-foreground">{plan.flights.return.flightNumber}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-foreground">{plan.flights.return.departure}</span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-foreground">{plan.flights.return.arrival}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{plan.flights.return.duration}</span>
+                  <span className="font-medium text-foreground">{plan.flights.return.estimatedCost}</span>
+                </div>
+                {plan.flights.return.note && (
+                  <p className="text-xs text-muted-foreground mt-2">💡 {plan.flights.return.note}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Hotel Section */}
+        {plan.hotel && (
+          <div className="bg-card rounded-xl p-5 mb-6 border border-border/50 shadow-soft">
+            <div className="flex items-center gap-2 mb-4">
+              <Hotel className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Accommodation</h3>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-medium text-foreground text-lg">{plan.hotel.name}</h4>
+                  <div className="flex items-center gap-1 mt-1">
+                    {Array.from({ length: plan.hotel.starRating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-medium text-foreground">{plan.hotel.estimatedCostPerNight}</span>
+                  <span className="text-xs text-muted-foreground block">per night</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                <div>
+                  <p>{plan.hotel.address}</p>
+                  <p className="text-xs">{plan.hotel.neighborhood}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {plan.hotel.amenities.slice(0, 5).map((amenity, i) => (
+                  <span key={i} className="text-xs bg-background px-2 py-1 rounded-full border border-border/50">
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+              <p className="text-sm text-muted-foreground">{plan.hotel.whyRecommended}</p>
+              <div className="flex items-center justify-between text-sm pt-2 border-t border-border/50">
+                <div className="flex items-center gap-4 text-muted-foreground">
+                  <span>Check-in: {plan.hotel.checkIn}</span>
+                  <span>Check-out: {plan.hotel.checkOut}</span>
+                </div>
+                <span className="font-medium text-foreground">Total: {plan.hotel.totalEstimatedCost}</span>
+              </div>
+              {plan.hotel.bookingTip && (
+                <p className="text-xs text-muted-foreground">💡 {plan.hotel.bookingTip}</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Days - Accordion Style */}
+        <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-primary" />
+          Daily Itinerary
+        </h3>
         <div className="space-y-3">
           {plan.days.map((day) => {
             const isOpen = openDays.includes(day.dayNumber);

@@ -23,6 +23,9 @@ import {
   Palmtree,
   Building2,
   Waves,
+  Hotel,
+  Star,
+  ArrowRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -62,10 +65,42 @@ type Day = {
   blocks: TimeBlock[];
 };
 
+type FlightInfo = {
+  airline: string;
+  flightNumber: string;
+  departure: string;
+  arrival: string;
+  duration: string;
+  estimatedCost: string;
+  class: string;
+  note: string;
+};
+
+type Flights = {
+  outbound: FlightInfo;
+  return: FlightInfo;
+};
+
+type HotelInfo = {
+  name: string;
+  address: string;
+  neighborhood: string;
+  starRating: number;
+  estimatedCostPerNight: string;
+  totalEstimatedCost: string;
+  amenities: string[];
+  whyRecommended: string;
+  checkIn: string;
+  checkOut: string;
+  bookingTip: string;
+};
+
 type TripPlan = {
   name: string;
   theme: string;
   summary: string;
+  flights?: Flights;
+  hotel?: HotelInfo;
   days: Day[];
   estimatedTotalCost: string;
   highlights: string[];
@@ -362,6 +397,143 @@ const PublishedTrip = () => {
         style={{ backgroundColor: "var(--theme-bg-darker)" }}
       >
         <div className="max-w-4xl mx-auto px-4 py-16">
+
+          {/* Flights Section */}
+          {plan.flights && (
+            <div 
+              className="rounded-xl p-6 mb-8 border"
+              style={{ 
+                backgroundColor: "rgba(255,255,255,0.03)",
+                borderColor: "rgba(255,255,255,0.1)"
+              }}
+            >
+              <div className="flex items-center gap-2 mb-5">
+                <Plane className="w-5 h-5" style={{ color: "var(--theme-accent)" }} />
+                <h3 className="font-semibold text-white text-lg">Flights</h3>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Outbound Flight */}
+                <div 
+                  className="rounded-lg p-4 space-y-2 border"
+                  style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--theme-accent)" }}>Outbound</span>
+                    <span className="text-xs text-white/60">{plan.flights.outbound.class}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-white">{plan.flights.outbound.airline}</span>
+                    <span className="text-xs text-white/50">{plan.flights.outbound.flightNumber}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-white">{plan.flights.outbound.departure}</span>
+                    <ArrowRight className="w-4 h-4 text-white/50" />
+                    <span className="text-white">{plan.flights.outbound.arrival}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/60">{plan.flights.outbound.duration}</span>
+                    <span className="font-medium text-white">{plan.flights.outbound.estimatedCost}</span>
+                  </div>
+                  {plan.flights.outbound.note && (
+                    <p className="text-xs text-white/50 mt-2">💡 {plan.flights.outbound.note}</p>
+                  )}
+                </div>
+                {/* Return Flight */}
+                <div 
+                  className="rounded-lg p-4 space-y-2 border"
+                  style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--theme-accent)" }}>Return</span>
+                    <span className="text-xs text-white/60">{plan.flights.return.class}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-white">{plan.flights.return.airline}</span>
+                    <span className="text-xs text-white/50">{plan.flights.return.flightNumber}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-white">{plan.flights.return.departure}</span>
+                    <ArrowRight className="w-4 h-4 text-white/50" />
+                    <span className="text-white">{plan.flights.return.arrival}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/60">{plan.flights.return.duration}</span>
+                    <span className="font-medium text-white">{plan.flights.return.estimatedCost}</span>
+                  </div>
+                  {plan.flights.return.note && (
+                    <p className="text-xs text-white/50 mt-2">💡 {plan.flights.return.note}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hotel Section */}
+          {plan.hotel && (
+            <div 
+              className="rounded-xl p-6 mb-8 border"
+              style={{ 
+                backgroundColor: "rgba(255,255,255,0.03)",
+                borderColor: "rgba(255,255,255,0.1)"
+              }}
+            >
+              <div className="flex items-center gap-2 mb-5">
+                <Hotel className="w-5 h-5" style={{ color: "var(--theme-accent)" }} />
+                <h3 className="font-semibold text-white text-lg">Accommodation</h3>
+              </div>
+              <div 
+                className="rounded-lg p-4 space-y-3 border"
+                style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-medium text-white text-lg">{plan.hotel.name}</h4>
+                    <div className="flex items-center gap-1 mt-1">
+                      {Array.from({ length: plan.hotel.starRating }).map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-medium text-white">{plan.hotel.estimatedCostPerNight}</span>
+                    <span className="text-xs text-white/50 block">per night</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-sm text-white/60">
+                  <MapPin className="w-4 h-4 shrink-0 mt-0.5" style={{ color: "var(--theme-accent)" }} />
+                  <div>
+                    <p>{plan.hotel.address}</p>
+                    <p className="text-xs text-white/40">{plan.hotel.neighborhood}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {plan.hotel.amenities.slice(0, 5).map((amenity, i) => (
+                    <span 
+                      key={i} 
+                      className="text-xs px-2 py-1 rounded-full border text-white/80"
+                      style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.1)" }}
+                    >
+                      {amenity}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-sm text-white/70">{plan.hotel.whyRecommended}</p>
+                <div 
+                  className="flex items-center justify-between text-sm pt-3 border-t"
+                  style={{ borderColor: "rgba(255,255,255,0.1)" }}
+                >
+                  <div className="flex items-center gap-4 text-white/60">
+                    <span>Check-in: {plan.hotel.checkIn}</span>
+                    <span>Check-out: {plan.hotel.checkOut}</span>
+                  </div>
+                  <span className="font-medium text-white">Total: {plan.hotel.totalEstimatedCost}</span>
+                </div>
+                {plan.hotel.bookingTip && (
+                  <p className="text-xs text-white/50">💡 {plan.hotel.bookingTip}</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Daily Itinerary */}
           <div className="space-y-10">

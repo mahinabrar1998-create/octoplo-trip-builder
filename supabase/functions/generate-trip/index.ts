@@ -34,6 +34,41 @@ Your response must be valid JSON with this exact structure:
     "name": "string (creative name for this plan)",
     "theme": "string (e.g., 'Cultural Immersion' or 'Adventure & Nature')",
     "summary": "string (2-3 sentence overview)",
+    "flights": {
+      "outbound": {
+        "airline": "string (e.g., 'United Airlines')",
+        "flightNumber": "string (e.g., 'UA 1234')",
+        "departure": "string (airport code and time, e.g., 'SFO 8:00 AM')",
+        "arrival": "string (airport code and time, e.g., 'JFK 4:30 PM')",
+        "duration": "string (e.g., '5h 30m')",
+        "estimatedCost": "string (e.g., '$350-500 per person')",
+        "class": "string (e.g., 'Economy', 'Business')",
+        "note": "string (booking tips or recommendations)"
+      },
+      "return": {
+        "airline": "string",
+        "flightNumber": "string",
+        "departure": "string",
+        "arrival": "string",
+        "duration": "string",
+        "estimatedCost": "string",
+        "class": "string",
+        "note": "string"
+      }
+    },
+    "hotel": {
+      "name": "string (specific hotel name)",
+      "address": "string (full address)",
+      "neighborhood": "string (area/district description)",
+      "starRating": number (1-5),
+      "estimatedCostPerNight": "string (e.g., '$150-200')",
+      "totalEstimatedCost": "string (for entire stay)",
+      "amenities": ["string", "string", "string"],
+      "whyRecommended": "string (2-3 sentences explaining why this hotel fits the trip)",
+      "checkIn": "string (time, e.g., '3:00 PM')",
+      "checkOut": "string (time, e.g., '11:00 AM')",
+      "bookingTip": "string (tips for getting best rates)"
+    },
     "days": [
       {
         "dayNumber": 1,
@@ -59,7 +94,7 @@ Your response must be valid JSON with this exact structure:
         ]
       }
     ],
-    "estimatedTotalCost": "string",
+    "estimatedTotalCost": "string (including flights and hotel)",
     "highlights": ["string", "string", "string"],
     "packingTips": ["string", "string", "string"]
   }
@@ -67,6 +102,8 @@ Your response must be valid JSON with this exact structure:
 
 CRITICAL Guidelines for DETAILED planning:
 - Create ONE comprehensive, highly detailed plan
+- ALWAYS include realistic flight recommendations based on the departure location (assume major nearby airport if not specified)
+- ALWAYS include a specific hotel recommendation that matches the budget and vibe
 - EVERY day MUST have 6-8 time blocks covering the ENTIRE day from morning (7-8 AM) to night (9-10 PM)
 - Time blocks should include: breakfast, morning activity, lunch, afternoon activity, dinner, evening activity/leisure
 - Consider realistic travel times between locations - account for traffic during rush hours
@@ -77,7 +114,9 @@ CRITICAL Guidelines for DETAILED planning:
 - Include specific restaurant names, attraction names, and neighborhoods
 - Factor in rest time and buffer between activities
 - Match the budget level and group size preferences
-- Make it realistic and actionable with specific venues and addresses`;
+- Make it realistic and actionable with specific venues and addresses
+- The estimatedTotalCost should include flights, hotel, and all activities`;
+
 
     const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.
 

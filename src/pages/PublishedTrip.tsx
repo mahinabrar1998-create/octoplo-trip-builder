@@ -362,52 +362,6 @@ const PublishedTrip = () => {
         style={{ backgroundColor: "var(--theme-bg-darker)" }}
       >
         <div className="max-w-4xl mx-auto px-4 py-16">
-          {/* Highlights Section */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-white">
-              Trip Highlights
-            </h2>
-            <div className="flex flex-wrap justify-center gap-3">
-              {plan.highlights.map((highlight, i) => (
-                <span
-                  key={i}
-                  className="px-5 py-2.5 rounded-full text-sm font-medium border"
-                  style={{ 
-                    backgroundColor: "rgba(255,255,255,0.05)",
-                    color: "var(--theme-accent)",
-                    borderColor: "var(--theme-primary)"
-                  }}
-                >
-                  ✨ {highlight}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Packing Tips */}
-          {plan.packingTips && plan.packingTips.length > 0 && (
-            <div 
-              className="rounded-2xl p-6 mb-16 border"
-              style={{ 
-                backgroundColor: "rgba(255,255,255,0.03)",
-                borderColor: "rgba(255,255,255,0.1)"
-              }}
-            >
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg text-white">
-                <span className="text-2xl">🎒</span> What to Pack
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {plan.packingTips.map((tip, i) => (
-                  <span
-                    key={i}
-                    className="px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20"
-                  >
-                    {tip}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Daily Itinerary */}
           <div className="space-y-10">
@@ -434,19 +388,11 @@ const PublishedTrip = () => {
                     }}
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div 
-                          className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-lg text-white"
-                          style={{ backgroundColor: "var(--theme-primary)" }}
-                        >
-                          {day.dayNumber}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-xl text-white">
-                            Day {day.dayNumber}
-                          </h3>
-                          <p className="text-white/60">{formattedDate}</p>
-                        </div>
+                      <div>
+                        <h3 className="font-bold text-xl text-white">
+                          Day {day.dayNumber}
+                        </h3>
+                        <p className="text-white/60">{formattedDate}</p>
                       </div>
                       <div 
                         className="flex items-center gap-3 px-4 py-2 rounded-xl border"
@@ -518,12 +464,14 @@ const PublishedTrip = () => {
                               </div>
                             </div>
                             <span 
-                              className="text-sm font-medium px-3 py-1 rounded-full"
+                              className="text-sm font-bold px-4 py-2 rounded-full border-2"
                               style={{ 
-                                backgroundColor: "var(--theme-secondary)", 
-                                color: "var(--theme-accent)" 
+                                backgroundColor: "var(--theme-primary)", 
+                                color: "white",
+                                borderColor: "var(--theme-accent)"
                               }}
                             >
+                              <DollarSign className="w-3 h-3 inline mr-1" />
                               {block.estimatedCost}
                             </span>
                           </div>

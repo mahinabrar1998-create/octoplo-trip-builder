@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Loader2, Check, X, Hotel, Star } from "lucide-react";
+import { Loader2, Check, X, Hotel, Star, Search, AlertCircle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,12 +30,20 @@ type HotelType = {
   bookingTip: string;
 };
 
-type HotelSuggestion = {
+type RealHotelResult = {
   name: string;
-  neighborhood: string;
-  estimatedCost: string;
+  hotelId: string;
+  address: string;
+  cityName: string;
+  rating: number | null;
+  pricePerNight: string;
+  totalPrice: string;
+  currency: string;
+  roomType?: string;
+  bedType?: string;
   amenities: string[];
-  reason: string;
+  cancellationPolicy?: string;
+  source: string;
 };
 
 interface EditHotelDrawerProps {
@@ -57,8 +65,9 @@ export function EditHotelDrawer({
 }: EditHotelDrawerProps) {
   const { toast } = useToast();
   const [editedHotel, setEditedHotel] = useState<HotelType | null>(null);
-  const [suggestions, setSuggestions] = useState<HotelSuggestion[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [hotelResults, setHotelResults] = useState<RealHotelResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (hotel && open) {
@@ -66,77 +75,113 @@ export function EditHotelDrawer({
     }
   }, [hotel, open]);
 
-  const handleGetSuggestions = async () => {
-    if (!editedHotel) return;
+  const searchRealHotels = async () => {
+    if (!destination || !tripDates.start || !tripDates.end) {
+      toast({
+        title: "Missing trip details",
+        description: "Please ensure destination and dates are set.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setLoadingSuggestions(true);
-    setSuggestions([]);
+    setSearching(true);
+    setSearchError(null);
+    setHotelResults([]);
 
     try {
-      const { data, error } = await supabase.functions.invoke("suggest-alternatives", {
+      console.log("Searching hotels for:", destination, tripDates);
+
+      const { data, error } = await supabase.functions.invoke("search-hotels", {
         body: {
-          block: {
-            time: editedHotel.checkIn,
-            endTime: editedHotel.checkOut,
-            title: editedHotel.name,
-            description: `${editedHotel.starRating}-star hotel in ${editedHotel.neighborhood}. ${editedHotel.whyRecommended}`,
-            location: editedHotel.address,
-            estimatedCost: editedHotel.totalEstimatedCost,
-            category: "accommodation",
-          },
           destination,
-          tripDates,
-          context: `Current hotel: ${editedHotel.name}, ${editedHotel.starRating} stars, ${editedHotel.estimatedCostPerNight}/night. Amenities: ${editedHotel.amenities.join(", ")}`,
+          checkInDate: tripDates.start,
+          checkOutDate: tripDates.end,
+          adults: 1,
+          maxResults: 3,
         },
       });
 
       if (error) throw error;
 
-      if (data?.suggestions) {
-        const hotelSuggestions = data.suggestions.map((s: any) => ({
-          name: s.title,
-          neighborhood: s.location,
-          estimatedCost: s.estimatedCost,
-          amenities: editedHotel.amenities, // Keep amenities as parsing them is complex
-          reason: s.reason,
-        }));
-        setSuggestions(hotelSuggestions);
+      if (data?.error) {
+        setSearchError(data.error);
+        toast({
+          title: "Search failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.hotels && data.hotels.length > 0) {
+        setHotelResults(data.hotels);
+        toast({
+          title: `Found ${data.hotels.length} hotels`,
+          description: "Real-time results from Amadeus",
+        });
+      } else {
+        setSearchError("No hotels found for this destination and dates.");
+        toast({
+          title: "No hotels found",
+          description: "Try a different destination or dates.",
+          variant: "destructive",
+        });
       }
     } catch (err) {
-      console.error("Error getting hotel suggestions:", err);
+      console.error("Error searching hotels:", err);
+      setSearchError("Failed to search hotels. Please try again.");
       toast({
-        title: "Couldn't get suggestions",
-        description: "Please try again.",
+        title: "Search error",
+        description: "Could not connect to hotel search. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setLoadingSuggestions(false);
+      setSearching(false);
     }
   };
 
-  const applySuggestion = (suggestion: HotelSuggestion) => {
+  const selectHotel = (hotelResult: RealHotelResult) => {
     if (!editedHotel) return;
+
+    // Calculate number of nights for the booking tip
+    const checkIn = new Date(tripDates.start);
+    const checkOut = new Date(tripDates.end);
+    const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+
     setEditedHotel({
       ...editedHotel,
-      name: suggestion.name,
-      neighborhood: suggestion.neighborhood,
-      totalEstimatedCost: suggestion.estimatedCost,
-      whyRecommended: suggestion.reason,
+      name: hotelResult.name,
+      address: hotelResult.address || hotelResult.cityName,
+      neighborhood: hotelResult.cityName,
+      starRating: hotelResult.rating || 3,
+      estimatedCostPerNight: hotelResult.pricePerNight,
+      totalEstimatedCost: hotelResult.totalPrice,
+      amenities: hotelResult.amenities.length > 0 ? hotelResult.amenities : editedHotel.amenities,
+      whyRecommended: hotelResult.roomType 
+        ? `${hotelResult.roomType}${hotelResult.bedType ? ` with ${hotelResult.bedType}` : ""}`
+        : "Real-time pricing from Amadeus",
+      checkIn: tripDates.start,
+      checkOut: tripDates.end,
+      bookingTip: hotelResult.cancellationPolicy || `${nights} night stay`,
     });
-    setSuggestions([]);
-    toast({ title: "Suggestion applied" });
+
+    setHotelResults([]);
+    toast({ title: "Hotel selected" });
   };
 
   const handleSave = () => {
     if (!editedHotel) return;
     onSave(editedHotel);
     onOpenChange(false);
-    setSuggestions([]);
+    setHotelResults([]);
+    setSearchError(null);
   };
 
   const handleClose = () => {
     onOpenChange(false);
-    setSuggestions([]);
+    setHotelResults([]);
+    setSearchError(null);
   };
 
   if (!hotel || !editedHotel) return null;
@@ -148,62 +193,118 @@ export function EditHotelDrawer({
           <DrawerHeader className="text-left">
             <DrawerTitle className="flex items-center gap-2">
               <Hotel className="w-5 h-5 text-primary" />
-              Edit Accommodation
+              Search Hotels
             </DrawerTitle>
             <DrawerDescription>
-              {destination} • {tripDates.start} to {tripDates.end}
+              Real-time hotel search powered by Amadeus
             </DrawerDescription>
           </DrawerHeader>
 
           <div className="px-4 space-y-4">
-            {/* AI Suggestions */}
+            {/* Search Info */}
+            <div className="bg-muted/50 rounded-lg p-3 text-sm">
+              <p className="text-muted-foreground">
+                <span className="font-medium text-foreground">{destination}</span>
+                {" • "}
+                {tripDates.start} to {tripDates.end}
+              </p>
+            </div>
+
+            {/* Search Button */}
             <Button
-              variant="outline"
-              onClick={handleGetSuggestions}
-              disabled={loadingSuggestions}
-              className="w-full gap-2 border-primary/30 hover:border-primary hover:bg-primary/5"
+              onClick={searchRealHotels}
+              disabled={searching}
+              className="w-full gap-2"
             >
-              {loadingSuggestions ? (
+              {searching ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Finding alternatives...
+                  Searching hotels...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  Get AI Hotel Suggestions
+                  <Search className="w-4 h-4" />
+                  Search Real Hotels
                 </>
               )}
             </Button>
 
-            {suggestions.length > 0 && (
+            {/* Search Error */}
+            {searchError && (
+              <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                {searchError}
+              </div>
+            )}
+
+            {/* Hotel Results */}
+            {hotelResults.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">AI Alternatives:</p>
-                {suggestions.map((suggestion, i) => (
+                <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  Live Hotel Results:
+                </p>
+                {hotelResults.map((hotelResult, i) => (
                   <button
                     key={i}
-                    onClick={() => applySuggestion(suggestion)}
-                    className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors space-y-1"
+                    onClick={() => selectHotel(hotelResult)}
+                    className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-sm text-foreground">{suggestion.name}</span>
-                      <span className="text-xs text-muted-foreground">{suggestion.estimatedCost}</span>
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex-1">
+                        <span className="font-medium text-sm text-foreground block">
+                          {hotelResult.name}
+                        </span>
+                        {hotelResult.rating && (
+                          <div className="flex items-center gap-0.5 mt-0.5">
+                            {Array.from({ length: hotelResult.rating }).map((_, i) => (
+                              <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-primary block">
+                          {hotelResult.totalPrice}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {hotelResult.pricePerNight}/night
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">{suggestion.neighborhood}</p>
-                    <p className="text-xs text-primary">{suggestion.reason}</p>
+                    <div className="text-xs text-muted-foreground">
+                      {hotelResult.address || hotelResult.cityName}
+                    </div>
+                    {hotelResult.roomType && (
+                      <div className="text-xs text-primary/80 mt-1">
+                        {hotelResult.roomType}
+                      </div>
+                    )}
+                    {hotelResult.amenities.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {hotelResult.amenities.slice(0, 3).map((amenity, j) => (
+                          <span key={j} className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                            {amenity}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Edit Form */}
+            {/* Manual Edit Form */}
             <div className="space-y-3 pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">Or enter details manually:</p>
+              
               <div className="space-y-1.5">
                 <Label className="text-xs">Hotel Name</Label>
                 <Input
                   value={editedHotel.name}
                   onChange={(e) => setEditedHotel({ ...editedHotel, name: e.target.value })}
                   className="h-9"
+                  placeholder="e.g., Marriott Downtown"
                 />
               </div>
 
@@ -235,6 +336,7 @@ export function EditHotelDrawer({
                     value={editedHotel.neighborhood}
                     onChange={(e) => setEditedHotel({ ...editedHotel, neighborhood: e.target.value })}
                     className="h-9"
+                    placeholder="e.g., Downtown"
                   />
                 </div>
               </div>
@@ -245,6 +347,7 @@ export function EditHotelDrawer({
                   value={editedHotel.address}
                   onChange={(e) => setEditedHotel({ ...editedHotel, address: e.target.value })}
                   className="h-9"
+                  placeholder="e.g., 123 Main St"
                 />
               </div>
 
@@ -255,6 +358,7 @@ export function EditHotelDrawer({
                     value={editedHotel.estimatedCostPerNight}
                     onChange={(e) => setEditedHotel({ ...editedHotel, estimatedCostPerNight: e.target.value })}
                     className="h-9"
+                    placeholder="e.g., $150"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -263,6 +367,7 @@ export function EditHotelDrawer({
                     value={editedHotel.totalEstimatedCost}
                     onChange={(e) => setEditedHotel({ ...editedHotel, totalEstimatedCost: e.target.value })}
                     className="h-9"
+                    placeholder="e.g., $450"
                   />
                 </div>
               </div>
@@ -274,6 +379,7 @@ export function EditHotelDrawer({
                     value={editedHotel.checkIn}
                     onChange={(e) => setEditedHotel({ ...editedHotel, checkIn: e.target.value })}
                     className="h-9"
+                    placeholder="e.g., 3:00 PM"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -282,6 +388,7 @@ export function EditHotelDrawer({
                     value={editedHotel.checkOut}
                     onChange={(e) => setEditedHotel({ ...editedHotel, checkOut: e.target.value })}
                     className="h-9"
+                    placeholder="e.g., 11:00 AM"
                   />
                 </div>
               </div>
@@ -295,6 +402,7 @@ export function EditHotelDrawer({
                     amenities: e.target.value.split(",").map(a => a.trim()).filter(Boolean)
                   })}
                   className="h-9"
+                  placeholder="e.g., WiFi, Pool, Gym"
                 />
               </div>
 
@@ -305,6 +413,7 @@ export function EditHotelDrawer({
                   onChange={(e) => setEditedHotel({ ...editedHotel, whyRecommended: e.target.value })}
                   rows={2}
                   className="resize-none text-sm"
+                  placeholder="e.g., Great location near attractions"
                 />
               </div>
             </div>

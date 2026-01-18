@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 const EntryCards = () => {
   const navigate = useNavigate();
-  const [scratchClicked, setScratchClicked] = useState(false);
   return <section id="how-it-works" className="py-12 px-6 md:py-[8px] pb-[20px]">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-6">
@@ -42,7 +40,7 @@ const EntryCards = () => {
             
             <p className="text-muted-foreground mb-8 leading-relaxed">Create your own itinerary time-block by time-block with or without AI suggestions.</p>
 
-            <Button variant="outline" size="lg" type="button" aria-pressed={scratchClicked} className={`w-full rounded-xl font-medium transition-colors ${scratchClicked ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary" : "hover:bg-primary hover:text-primary-foreground hover:border-primary active:bg-primary active:text-primary-foreground"}`} onPointerDown={() => setScratchClicked(true)} onClick={() => setScratchClicked(true)}>
+            <Button variant="outline" size="lg" className="w-full rounded-xl font-medium hover:bg-primary hover:text-primary-foreground hover:border-primary" onClick={() => navigate("/build")}>
               Start from scratch
             </Button>
 

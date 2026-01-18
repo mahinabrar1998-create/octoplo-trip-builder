@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2, Check, X, Plane, MapPin, Navigation } from "lucide-react";
+import { Sparkles, Loader2, Check, X, Plane, MapPin, Navigation, Search, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,15 +31,18 @@ type Flights = {
   return: FlightInfo;
 };
 
-type FlightSuggestion = {
+type RealFlightResult = {
   airline: string;
   flightNumber: string;
   departureTime: string;
   arrivalTime: string;
   duration: string;
-  estimatedCost: string;
-  class: string;
-  reason: string;
+  stops: number;
+  price: string;
+  currency: string;
+  cabinClass: string;
+  departureAirport: string;
+  arrivalAirport: string;
 };
 
 interface EditFlightsDrawerProps {
@@ -122,6 +125,8 @@ const cityToAirport: Record<string, string> = {
   "bali": "DPS",
   "hawaii": "HNL",
   "honolulu": "HNL",
+  "virginia": "IAD",
+  "northern virginia": "IAD",
 };
 
 function getAirportCode(city: string): string {
@@ -130,6 +135,10 @@ function getAirportCode(city: string): string {
     if (normalized.includes(key)) {
       return code;
     }
+  }
+  // If it looks like an airport code already (3 letters uppercase), return as-is
+  if (/^[A-Z]{3}$/.test(city.trim())) {
+    return city.trim();
   }
   // Return first 3 letters uppercase as fallback
   return city.substring(0, 3).toUpperCase();
@@ -145,8 +154,9 @@ export function EditFlightsDrawer({
 }: EditFlightsDrawerProps) {
   const { toast } = useToast();
   const [editedFlights, setEditedFlights] = useState<Flights | null>(null);
-  const [suggestions, setSuggestions] = useState<{ outbound: FlightSuggestion[]; return: FlightSuggestion[] }>({ outbound: [], return: [] });
-  const [loadingSuggestions, setLoadingSuggestions] = useState<"outbound" | "return" | null>(null);
+  const [flightResults, setFlightResults] = useState<{ outbound: RealFlightResult[]; return: RealFlightResult[] }>({ outbound: [], return: [] });
+  const [searching, setSearching] = useState<"outbound" | "return" | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const [userLocation, setUserLocation] = useState<string>("");
   const [detectingLocation, setDetectingLocation] = useState(false);
@@ -167,16 +177,14 @@ export function EditFlightsDrawer({
   const detectUserLocation = async () => {
     setDetectingLocation(true);
     try {
-      // Try to get location from browser geolocation
       if ("geolocation" in navigator) {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             timeout: 5000,
-            maximumAge: 300000, // Cache for 5 minutes
+            maximumAge: 300000,
           });
         });
 
-        // Use reverse geocoding to get city name
         const { latitude, longitude } = position.coords;
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
@@ -189,7 +197,7 @@ export function EditFlightsDrawer({
             setUserLocation(city);
             toast({
               title: "Location detected",
-              description: `Departure from ${city}`,
+              description: `Departure from ${city} (${getAirportCode(city)})`,
             });
             return;
           }
@@ -201,104 +209,119 @@ export function EditFlightsDrawer({
       setDetectingLocation(false);
     }
 
-    // Fallback: Ask user to enter manually
     toast({
       title: "Enter your departure city",
       description: "We couldn't detect your location automatically.",
     });
   };
 
-  const handleGetSuggestions = async (type: "outbound" | "return") => {
-    if (!editedFlights) return;
-    
+  const searchRealFlights = async (type: "outbound" | "return") => {
     if (!userLocation) {
       toast({
         title: "Enter departure city",
-        description: "Please enter your departure city first.",
+        description: "Please enter your departure city or airport code first.",
         variant: "destructive",
       });
       return;
     }
 
-    setLoadingSuggestions(type);
+    setSearching(type);
+    setSearchError(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke("suggest-flights", {
+      const originCode = getAirportCode(type === "outbound" ? userLocation : destination);
+      const destCode = getAirportCode(type === "outbound" ? destination : userLocation);
+      const date = type === "outbound" ? tripDates.start : tripDates.end;
+
+      console.log(`Searching ${type} flights: ${originCode} → ${destCode} on ${date}`);
+
+      const { data, error } = await supabase.functions.invoke("search-flights", {
         body: {
-          type,
-          origin: userLocation,
-          destination,
-          departureDate: type === "outbound" ? tripDates.start : tripDates.end,
-          currentFlight: editedFlights[type].airline ? {
-            airline: editedFlights[type].airline,
-            flightNumber: editedFlights[type].flightNumber,
-            departure: editedFlights[type].departure,
-            arrival: editedFlights[type].arrival,
-          } : undefined,
+          origin: originCode,
+          destination: destCode,
+          departureDate: date,
+          adults: 1,
+          maxResults: 5,
         },
       });
 
       if (error) throw error;
 
-      if (data?.suggestions) {
-        setSuggestions(prev => ({ ...prev, [type]: data.suggestions }));
+      if (data?.error) {
+        setSearchError(data.error);
+        toast({
+          title: "Search failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.flights && data.flights.length > 0) {
+        setFlightResults(prev => ({ ...prev, [type]: data.flights }));
+        toast({
+          title: `Found ${data.flights.length} flights`,
+          description: "Real-time results from Amadeus",
+        });
+      } else {
+        setSearchError("No flights found for this route and date.");
+        toast({
+          title: "No flights found",
+          description: "Try different dates or check airport codes.",
+          variant: "destructive",
+        });
       }
     } catch (err) {
-      console.error("Error getting flight suggestions:", err);
+      console.error("Error searching flights:", err);
+      setSearchError("Failed to search flights. Please try again.");
       toast({
-        title: "Couldn't get suggestions",
-        description: "Please try again.",
+        title: "Search error",
+        description: "Could not connect to flight search. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setLoadingSuggestions(null);
+      setSearching(null);
     }
   };
 
-  const applySuggestion = (suggestion: FlightSuggestion, type: "outbound" | "return") => {
+  const selectFlight = (flight: RealFlightResult, type: "outbound" | "return") => {
     if (!editedFlights) return;
-    
-    const originCode = getAirportCode(userLocation);
-    const destCode = getAirportCode(destination);
     
     setEditedFlights({
       ...editedFlights,
       [type]: {
         ...editedFlights[type],
-        airline: suggestion.airline,
-        flightNumber: suggestion.flightNumber,
-        departure: type === "outbound" 
-          ? `${originCode} ${suggestion.departureTime}` 
-          : `${destCode} ${suggestion.departureTime}`,
-        arrival: type === "outbound" 
-          ? `${destCode} ${suggestion.arrivalTime}` 
-          : `${originCode} ${suggestion.arrivalTime}`,
-        duration: suggestion.duration,
-        estimatedCost: suggestion.estimatedCost,
-        class: suggestion.class || "Economy",
-        note: suggestion.reason,
+        airline: flight.airline,
+        flightNumber: flight.flightNumber,
+        departure: `${flight.departureAirport} ${flight.departureTime}`,
+        arrival: `${flight.arrivalAirport} ${flight.arrivalTime}`,
+        duration: flight.duration,
+        estimatedCost: `$${flight.price}`,
+        class: flight.cabinClass,
+        note: flight.stops === 0 ? "Direct flight" : `${flight.stops} stop${flight.stops > 1 ? "s" : ""}`,
       },
     });
-    setSuggestions(prev => ({ ...prev, [type]: [] }));
-    toast({ title: "Flight details applied" });
+    setFlightResults(prev => ({ ...prev, [type]: [] }));
+    toast({ title: "Flight selected" });
   };
 
   const handleSave = () => {
     if (!editedFlights) return;
     onSave(editedFlights);
     onOpenChange(false);
-    setSuggestions({ outbound: [], return: [] });
+    setFlightResults({ outbound: [], return: [] });
   };
 
   const handleClose = () => {
     onOpenChange(false);
-    setSuggestions({ outbound: [], return: [] });
+    setFlightResults({ outbound: [], return: [] });
+    setSearchError(null);
   };
 
   if (!flights || !editedFlights) return null;
 
   const currentFlight = editedFlights[activeTab];
-  const currentSuggestions = suggestions[activeTab];
+  const currentResults = flightResults[activeTab];
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -307,10 +330,10 @@ export function EditFlightsDrawer({
           <DrawerHeader className="text-left">
             <DrawerTitle className="flex items-center gap-2">
               <Plane className="w-5 h-5 text-primary" />
-              Edit Flights
+              Search Flights
             </DrawerTitle>
             <DrawerDescription>
-              {tripDates.start} to {tripDates.end}
+              Real-time flight search powered by Amadeus
             </DrawerDescription>
           </DrawerHeader>
 
@@ -319,13 +342,13 @@ export function EditFlightsDrawer({
             <div className="space-y-1.5">
               <Label className="text-xs flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                Departure City
+                Departure City / Airport Code
               </Label>
               <div className="flex gap-2">
                 <Input
                   value={userLocation}
                   onChange={(e) => setUserLocation(e.target.value)}
-                  placeholder="Enter your departure city"
+                  placeholder="e.g., New York or JFK"
                   className="h-9 flex-1"
                 />
                 <Button
@@ -345,7 +368,7 @@ export function EditFlightsDrawer({
               </div>
               {userLocation && (
                 <p className="text-xs text-muted-foreground">
-                  Flying {getAirportCode(userLocation)} ↔ {getAirportCode(destination)}
+                  Route: {getAirportCode(userLocation)} ↔ {getAirportCode(destination)}
                 </p>
               )}
             </div>
@@ -370,55 +393,76 @@ export function EditFlightsDrawer({
               </Button>
             </div>
 
-            {/* AI Suggestions */}
+            {/* Search Button */}
             <Button
-              variant="outline"
-              onClick={() => handleGetSuggestions(activeTab)}
-              disabled={loadingSuggestions !== null || !userLocation}
-              className="w-full gap-2 border-primary/30 hover:border-primary hover:bg-primary/5"
+              onClick={() => searchRealFlights(activeTab)}
+              disabled={searching !== null || !userLocation}
+              className="w-full gap-2"
             >
-              {loadingSuggestions === activeTab ? (
+              {searching === activeTab ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Finding flights...
+                  Searching flights...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  Get AI Flight Suggestions
+                  <Search className="w-4 h-4" />
+                  Search Real Flights
                 </>
               )}
             </Button>
 
-            {currentSuggestions.length > 0 && (
+            {/* Search Error */}
+            {searchError && (
+              <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                {searchError}
+              </div>
+            )}
+
+            {/* Flight Results */}
+            {currentResults.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">AI Flight Options:</p>
-                {currentSuggestions.map((suggestion, i) => (
+                <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  Live Flight Results:
+                </p>
+                {currentResults.map((flight, i) => (
                   <button
                     key={i}
-                    onClick={() => applySuggestion(suggestion, activeTab)}
-                    className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors space-y-1"
+                    onClick={() => selectFlight(flight, activeTab)}
+                    className="w-full text-left p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-1">
                       <span className="font-medium text-sm text-foreground">
-                        {suggestion.airline} {suggestion.flightNumber}
+                        {flight.airline}
                       </span>
-                      <span className="text-xs font-medium text-primary">{suggestion.estimatedCost}</span>
+                      <span className="text-sm font-semibold text-primary">
+                        ${flight.price}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{suggestion.departureTime}</span>
+                      <span className="font-mono">{flight.flightNumber}</span>
+                      <span>•</span>
+                      <span>{flight.departureAirport} {flight.departureTime}</span>
                       <span>→</span>
-                      <span>{suggestion.arrivalTime}</span>
-                      <span className="text-muted-foreground/60">({suggestion.duration})</span>
+                      <span>{flight.arrivalAirport} {flight.arrivalTime}</span>
                     </div>
-                    <p className="text-xs text-primary/80">{suggestion.reason}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                      <span>{flight.duration}</span>
+                      <span>•</span>
+                      <span>{flight.stops === 0 ? "Direct" : `${flight.stops} stop${flight.stops > 1 ? "s" : ""}`}</span>
+                      <span>•</span>
+                      <span className="capitalize">{flight.cabinClass.toLowerCase()}</span>
+                    </div>
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Edit Form */}
+            {/* Manual Edit Form */}
             <div className="space-y-3 pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">Or enter details manually:</p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs">Airline</Label>

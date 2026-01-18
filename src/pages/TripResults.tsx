@@ -418,18 +418,13 @@ const TripResults = () => {
                 <CollapsibleTrigger asChild>
                   <button className="w-full bg-card rounded-xl p-4 shadow-soft border border-border/50 hover:border-primary/30 transition-all group">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
-                          {day.dayNumber}
-                        </div>
-                        <div className="text-left">
-                          <h3 className="font-semibold text-foreground">
-                            Day {day.dayNumber}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {day.blocks.length} activities planned
-                          </p>
-                        </div>
+                      <div className="text-left">
+                        <h3 className="font-semibold text-primary">
+                          Day {day.dayNumber}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {day.blocks.length} activities planned
+                        </p>
                       </div>
 
                       <div className="flex items-center gap-4">

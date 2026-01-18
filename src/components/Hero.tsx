@@ -1,6 +1,6 @@
 import mascot from "@/assets/octoplo-mascot.png";
 const Hero = () => {
-  return <section className="pt-8 pb-16 md:pt-12 px-6 py-[20px] md:pb-[24px]">
+  return <section className="pt-8 pb-16 md:pt-12 px-6 py-[20px] md:pb-[18px]">
       <div className="max-w-4xl mx-auto text-center">
         {/* Mascot */}
         <div className="mb-4 md:mb-6">
@@ -13,9 +13,6 @@ const Hero = () => {
         </h1>
 
         {/* Subheadline */}
-        <p className="text-lg md:text-xl text-muted-foreground">
-          One shared place to plan, decide, and remember your trip.
-        </p>
         
       </div>
     </section>;

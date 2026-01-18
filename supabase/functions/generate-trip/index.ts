@@ -5,6 +5,44 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory rate limiter
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 5; // 5 trips per hour per IP
+
+function getClientIP(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+         req.headers.get('x-real-ip') || 
+         'unknown';
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+  
+  // Clean up expired entries periodically
+  if (rateLimitStore.size > 10000) {
+    for (const [key, value] of rateLimitStore.entries()) {
+      if (now > value.resetTime) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }
+  
+  if (!record || now > record.resetTime) {
+    // New window
+    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1, resetIn: RATE_LIMIT_WINDOW_MS };
+  }
+  
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, remaining: 0, resetIn: record.resetTime - now };
+  }
+  
+  record.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count, resetIn: record.resetTime - now };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,6 +50,27 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting check
+    const clientIP = getClientIP(req);
+    const rateLimit = checkRateLimit(clientIP);
+    
+    console.log(`Rate limit check for IP ${clientIP}: allowed=${rateLimit.allowed}, remaining=${rateLimit.remaining}`);
+    
+    if (!rateLimit.allowed) {
+      const resetInMinutes = Math.ceil(rateLimit.resetIn / 60000);
+      return new Response(JSON.stringify({ 
+        error: `Rate limit exceeded. You can generate ${MAX_REQUESTS_PER_WINDOW} trips per hour. Try again in ${resetInMinutes} minutes.` 
+      }), {
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(Math.ceil(rateLimit.resetIn / 1000))
+        },
+      });
+    }
+
     const { destination, startDate, endDate, budget, groupSize, vibe, specialInstructions } = await req.json();
     
     console.log("Generating trip for:", { destination, startDate, endDate, budget, groupSize, vibe });
@@ -220,7 +279,11 @@ Generate a complete, detailed itinerary that someone could follow exactly.`;
     console.log("Trip plan generated successfully");
 
     return new Response(JSON.stringify({ plan: plans.plan }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "application/json",
+        "X-RateLimit-Remaining": String(rateLimit.remaining)
+      },
     });
 
   } catch (error) {

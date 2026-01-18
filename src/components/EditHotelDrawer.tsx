@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Check, X, Hotel, Star, Search, AlertCircle, Sparkles } from "lucide-react";
+import { Loader2, Check, X, Hotel, Search, AlertCircle, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -43,6 +43,7 @@ type RealHotelResult = {
   amenities: string[];
   cancellationPolicy?: string;
   source: string;
+  recommendation?: string;
 };
 
 interface EditHotelDrawerProps {
@@ -252,12 +253,10 @@ export function EditHotelDrawer({
                         <span className="font-medium text-sm text-foreground block">
                           {hotelResult.name}
                         </span>
-                        {hotelResult.rating && (
-                          <div className="flex items-center gap-0.5 mt-0.5">
-                            {Array.from({ length: hotelResult.rating }).map((_, i) => (
-                              <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                          </div>
+                        {hotelResult.recommendation && (
+                          <span className="text-xs text-muted-foreground mt-0.5 block">
+                            {hotelResult.recommendation}
+                          </span>
                         )}
                       </div>
                       <div className="text-right">
@@ -269,21 +268,9 @@ export function EditHotelDrawer({
                         </span>
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {hotelResult.address || hotelResult.cityName}
-                    </div>
                     {hotelResult.roomType && (
                       <div className="text-xs text-primary/80 mt-1">
                         {hotelResult.roomType}
-                      </div>
-                    )}
-                    {hotelResult.amenities.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {hotelResult.amenities.slice(0, 3).map((amenity, j) => (
-                          <span key={j} className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                            {amenity}
-                          </span>
-                        ))}
                       </div>
                     )}
                   </button>
@@ -303,39 +290,6 @@ export function EditHotelDrawer({
                   className="h-9"
                   placeholder="e.g., Marriott Downtown"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Star Rating</Label>
-                  <div className="flex items-center gap-1 h-9">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setEditedHotel({ ...editedHotel, starRating: star })}
-                        className="p-0.5"
-                      >
-                        <Star
-                          className={`w-5 h-5 ${
-                            star <= editedHotel.starRating
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Neighborhood</Label>
-                  <Input
-                    value={editedHotel.neighborhood}
-                    onChange={(e) => setEditedHotel({ ...editedHotel, neighborhood: e.target.value })}
-                    className="h-9"
-                    placeholder="e.g., Downtown"
-                  />
-                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -388,19 +342,6 @@ export function EditHotelDrawer({
                     placeholder="e.g., 11:00 AM"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Amenities (comma separated)</Label>
-                <Input
-                  value={editedHotel.amenities.join(", ")}
-                  onChange={(e) => setEditedHotel({ 
-                    ...editedHotel, 
-                    amenities: e.target.value.split(",").map(a => a.trim()).filter(Boolean)
-                  })}
-                  className="h-9"
-                  placeholder="e.g., WiFi, Pool, Gym"
-                />
               </div>
 
               <div className="space-y-1.5">

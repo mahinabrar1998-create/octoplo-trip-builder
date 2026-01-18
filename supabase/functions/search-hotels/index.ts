@@ -298,12 +298,27 @@ serve(async (req) => {
                            .replace(/\s+/g, " ")
                            .trim();
 
+      // Generate a short recommendation based on available data
+      let recommendation = "";
+      const rating = hotel.rating ? parseInt(hotel.rating) : null;
+      if (rating && rating >= 4) {
+        recommendation = "Highly rated property";
+      } else if (bestOffer?.policies?.cancellation?.type === "FREE_CANCELLATION") {
+        recommendation = "Free cancellation available";
+      } else if (totalPrice > 0 && nights > 0 && (totalPrice / nights) < 150) {
+        recommendation = "Great value for money";
+      } else if (hotel.distance?.value && parseFloat(hotel.distance.value) < 3) {
+        recommendation = "Close to city center";
+      } else {
+        recommendation = "Real-time pricing";
+      }
+
       return {
         name: cleanName,
         hotelId: hotel.hotelId,
         address: hotel.address?.lines?.join(", ") || "",
         cityName: hotel.cityCode || cityCode,
-        rating: hotel.rating ? parseInt(hotel.rating) : null,
+        rating: rating,
         pricePerNight: `$${pricePerNight}`,
         totalPrice: `$${price?.total || "N/A"}`,
         currency: price?.currency || "USD",
@@ -312,6 +327,7 @@ serve(async (req) => {
         checkInTime: bestOffer?.checkInDate || checkInDate,
         checkOutTime: bestOffer?.checkOutDate || checkOutDate,
         cancellationPolicy: bestOffer?.policies?.cancellation?.description?.text || "Check hotel policy",
+        recommendation,
         source: "amadeus",
       };
     }) || [];

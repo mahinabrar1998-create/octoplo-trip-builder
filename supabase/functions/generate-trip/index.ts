@@ -108,7 +108,7 @@ Generate a complete, detailed itinerary that someone could follow exactly.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -137,12 +137,29 @@ Generate a complete, detailed itinerary that someone could follow exactly.`;
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    const data = await response.json();
+    // Get raw text first to handle empty responses
+    const rawText = await response.text();
+    console.log("Raw response length:", rawText.length);
+    
+    if (!rawText || rawText.trim().length === 0) {
+      console.error("Empty response from AI gateway");
+      throw new Error("Empty response from AI. Please try again.");
+    }
+
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (jsonError) {
+      console.error("Failed to parse AI gateway response:", rawText.substring(0, 500));
+      throw new Error("Invalid response from AI gateway. Please try again.");
+    }
+
     console.log("AI response received");
     
     const content = data.choices?.[0]?.message?.content;
     if (!content) {
-      throw new Error("No content in AI response");
+      console.error("No content in response. Full response:", JSON.stringify(data).substring(0, 500));
+      throw new Error("No content in AI response. Please try again.");
     }
 
     // Parse the JSON from the response (handle markdown code blocks)

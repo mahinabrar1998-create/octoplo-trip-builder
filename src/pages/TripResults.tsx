@@ -332,147 +332,82 @@ const TripResults = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
-        {/* Underwater Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan-400 via-blue-500 to-blue-900" />
-        
-        {/* Animated bubbles */}
-        <div className="absolute inset-0 overflow-hidden">
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute rounded-full bg-white/20 animate-[bubble_4s_ease-in-out_infinite]"
-              style={{
-                width: `${8 + Math.random() * 16}px`,
-                height: `${8 + Math.random() * 16}px`,
-                left: `${Math.random() * 100}%`,
-                bottom: `-20px`,
-                animationDelay: `${i * 0.3}s`,
-                animationDuration: `${3 + Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
-        
+        <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
-          {/* Underwater Scene */}
-          <div className="relative w-80 h-56 mx-auto">
-            {/* Underwater Mountains/Rocks */}
-            <svg viewBox="0 0 320 224" className="absolute inset-0 w-full h-full">
-              {/* Background mountain */}
-              <polygon 
-                points="0,224 60,140 100,180 160,100 220,160 280,120 320,224" 
-                className="fill-blue-800/60"
-              />
-              {/* Foreground mountain */}
-              <polygon 
-                points="0,224 40,170 100,200 140,150 200,190 240,140 300,180 320,160 320,224" 
-                className="fill-blue-900/80"
-              />
-              {/* Seafloor */}
-              <ellipse cx="160" cy="224" rx="180" ry="30" className="fill-blue-950/50" />
-              
-              {/* Seaweed */}
-              <path d="M50,224 Q45,200 55,180 Q50,165 55,150" className="stroke-emerald-600/70 fill-none stroke-[3] animate-[sway_3s_ease-in-out_infinite]" />
-              <path d="M60,224 Q65,195 55,175 Q60,155 55,140" className="stroke-emerald-500/70 fill-none stroke-[3] animate-[sway_3s_ease-in-out_infinite_0.5s]" />
-              <path d="M260,224 Q255,190 265,165 Q260,145 265,125" className="stroke-emerald-600/70 fill-none stroke-[3] animate-[sway_3s_ease-in-out_infinite_1s]" />
-              <path d="M270,224 Q275,200 265,180 Q270,160 265,145" className="stroke-emerald-500/70 fill-none stroke-[3] animate-[sway_3s_ease-in-out_infinite_0.3s]" />
-              
-              {/* Small fish swimming opposite direction */}
-              <g className="animate-[fishSwim_6s_linear_infinite]">
-                <ellipse cx="0" cy="140" rx="8" ry="4" className="fill-yellow-400/60" />
-                <polygon points="-8,140 -14,135 -14,145" className="fill-yellow-400/60" />
-              </g>
-              <g className="animate-[fishSwim_7s_linear_infinite_2s]">
-                <ellipse cx="0" cy="110" rx="6" ry="3" className="fill-pink-400/50" />
-                <polygon points="-6,110 -10,107 -10,113" className="fill-pink-400/50" />
-              </g>
-            </svg>
+          {/* Fun Hiking Animation */}
+          <div className="relative w-64 h-48 mx-auto">
+            {/* Ground/Path */}
+            <div className="absolute bottom-8 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent rounded-full" />
             
-            {/* Swimming Octopus */}
-            <div className="absolute animate-[swim_4s_ease-in-out_infinite]">
-              <svg viewBox="0 0 100 100" className="w-20 h-20">
-                {/* Octopus Body */}
-                <ellipse cx="50" cy="35" rx="25" ry="22" className="fill-orange-500" />
+            {/* Walking Hiker */}
+            <div className="absolute bottom-10 animate-[walk_2s_ease-in-out_infinite]">
+              <div className="relative">
+                {/* Backpack */}
+                <div className="absolute -right-1 top-3 w-4 h-6 bg-primary/80 rounded-sm" />
+                <div className="absolute -right-0.5 top-2 w-2 h-2 bg-primary rounded-full" />
                 
-                {/* Eyes */}
-                <circle cx="42" cy="32" r="5" className="fill-white" />
-                <circle cx="58" cy="32" r="5" className="fill-white" />
-                <circle cx="43" cy="33" r="2.5" className="fill-gray-800" />
-                <circle cx="59" cy="33" r="2.5" className="fill-gray-800" />
+                {/* Head */}
+                <div className="w-6 h-6 bg-foreground rounded-full mx-auto" />
                 
-                {/* Smile */}
-                <path d="M42,42 Q50,48 58,42" className="stroke-gray-800 stroke-2 fill-none" strokeLinecap="round" />
+                {/* Body */}
+                <div className="w-4 h-8 bg-foreground rounded-sm mx-auto -mt-1" />
                 
-                {/* Tentacles with curls */}
-                <path d="M30,50 Q20,60 25,75 Q28,82 22,85" className="stroke-orange-500 stroke-[6] fill-none animate-[tentacle1_1s_ease-in-out_infinite]" strokeLinecap="round" />
-                <path d="M38,52 Q32,65 35,78 Q37,85 32,90" className="stroke-orange-500 stroke-[6] fill-none animate-[tentacle2_1s_ease-in-out_infinite_0.1s]" strokeLinecap="round" />
-                <path d="M50,54 Q50,68 48,80 Q47,88 52,92" className="stroke-orange-500 stroke-[6] fill-none animate-[tentacle1_1s_ease-in-out_infinite_0.2s]" strokeLinecap="round" />
-                <path d="M62,52 Q68,65 65,78 Q63,85 68,90" className="stroke-orange-500 stroke-[6] fill-none animate-[tentacle2_1s_ease-in-out_infinite_0.15s]" strokeLinecap="round" />
-                <path d="M70,50 Q80,60 75,75 Q72,82 78,85" className="stroke-orange-500 stroke-[6] fill-none animate-[tentacle1_1s_ease-in-out_infinite_0.25s]" strokeLinecap="round" />
-                
-                {/* Highlight */}
-                <ellipse cx="60" cy="28" rx="4" ry="3" className="fill-orange-300/50" />
-              </svg>
+                {/* Legs - animated */}
+                <div className="flex justify-center gap-1 -mt-1">
+                  <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[leftLeg_0.5s_ease-in-out_infinite]" />
+                  <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[rightLeg_0.5s_ease-in-out_infinite]" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Floating travel icons */}
+            <div className="absolute top-4 left-8 animate-[float_3s_ease-in-out_infinite]">
+              <MapPin className="w-6 h-6 text-primary/60" />
+            </div>
+            <div className="absolute top-8 right-12 animate-[float_3s_ease-in-out_infinite_0.5s]">
+              <Plane className="w-5 h-5 text-primary/50" />
+            </div>
+            <div className="absolute top-2 right-6 animate-[float_3s_ease-in-out_infinite_1s]">
+              <Globe className="w-5 h-5 text-primary/40" />
+            </div>
+            
+            {/* Dotted path ahead */}
+            <div className="absolute bottom-8 right-0 flex gap-2">
+              {[...Array(5)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="w-2 h-2 rounded-full bg-primary/30 animate-pulse"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                />
+              ))}
             </div>
           </div>
           
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-foreground">
               Crafting your perfect trip...
             </h2>
-            <p className="text-white/80 max-w-md mx-auto">
+            <p className="text-muted-foreground max-w-md mx-auto">
               Our AI is creating a detailed itinerary with weather forecasts, transport tips, and optimal timing. This usually takes 20-40 seconds.
             </p>
           </div>
         </div>
         <style>{`
-          @keyframes swim {
-            0%, 100% { 
-              left: 5%; 
-              top: 25%;
-              transform: scaleX(1);
-            }
-            45% { 
-              left: 65%; 
-              top: 35%;
-              transform: scaleX(1);
-            }
-            50% { 
-              left: 65%; 
-              top: 35%;
-              transform: scaleX(-1);
-            }
-            95% { 
-              left: 5%; 
-              top: 25%;
-              transform: scaleX(-1);
-            }
+          @keyframes walk {
+            0%, 100% { left: 10%; }
+            50% { left: 45%; }
           }
-          @keyframes tentacle1 {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
+          @keyframes leftLeg {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
           }
-          @keyframes tentacle2 {
-            0%, 100% { transform: rotate(5deg); }
-            50% { transform: rotate(-5deg); }
+          @keyframes rightLeg {
+            0%, 100% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
           }
-          @keyframes bubble {
-            0% { 
-              transform: translateY(0) scale(1);
-              opacity: 0.6;
-            }
-            100% { 
-              transform: translateY(-400px) scale(0.5);
-              opacity: 0;
-            }
-          }
-          @keyframes sway {
-            0%, 100% { transform: skewX(-5deg); }
-            50% { transform: skewX(5deg); }
-          }
-          @keyframes fishSwim {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(400px); }
+          @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
           }
         `}</style>
       </div>

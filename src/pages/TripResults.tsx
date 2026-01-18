@@ -497,11 +497,11 @@ const TripResults = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">
             {plan.name}
           </h1>
-          <p className="text-muted-foreground text-sm max-w-xl mx-auto line-clamp-2">
+          <p className="text-muted-foreground text-sm max-w-xl mx-auto leading-relaxed">
             {plan.summary}
           </p>
           
-          <div className="flex items-center justify-center gap-3 text-xs">
+          <div className="flex items-center justify-center gap-3 text-xs flex-wrap">
             <span className="flex items-center gap-1 bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
               <Calendar className="w-3 h-3" />
               {new Date(plan.days[0]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {new Date(plan.days[plan.days.length - 1]?.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
@@ -511,8 +511,17 @@ const TripResults = () => {
               {plan.days.length} days
             </span>
             <span className="flex items-center gap-1 bg-muted text-foreground border border-foreground/20 px-2.5 py-1 rounded-full font-medium">
-              <DollarSign className="w-3 h-3" />
-              {plan.estimatedTotalCost.split('(')[0].trim()}
+              {(() => {
+                const cost = plan.estimatedTotalCost.split('(')[0].trim();
+                // Remove leading $ if present to avoid duplication with icon
+                const cleanCost = cost.startsWith('$') ? cost.substring(1).trim() : cost;
+                return (
+                  <>
+                    <DollarSign className="w-3 h-3" />
+                    {cleanCost}
+                  </>
+                );
+              })()}
             </span>
           </div>
         </div>

@@ -334,71 +334,80 @@ const TripResults = () => {
       <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
         <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
-          {/* Fun Climber Animation */}
-          <div className="relative w-48 h-64 mx-auto">
-            {/* Mountain */}
-            <svg viewBox="0 0 200 260" className="w-full h-full">
-              {/* Mountain Background */}
-              <polygon 
-                points="100,20 180,240 20,240" 
-                className="fill-muted stroke-border" 
-                strokeWidth="2"
-              />
-              {/* Snow Cap */}
-              <polygon 
-                points="100,20 130,80 70,80" 
-                className="fill-background stroke-border" 
-                strokeWidth="1"
-              />
-              {/* Mountain Path (dotted line) */}
-              <path 
-                d="M 40,220 Q 60,180 80,160 Q 100,140 90,110 Q 85,90 100,60" 
-                fill="none" 
-                className="stroke-primary/40" 
-                strokeWidth="2" 
-                strokeDasharray="4 4"
-              />
-              {/* Climber */}
-              <g className="animate-[climb_3s_ease-in-out_infinite]">
-                {/* Body */}
-                <circle cx="0" cy="0" r="8" className="fill-primary" />
+          {/* Fun Hiking Animation */}
+          <div className="relative w-64 h-48 mx-auto">
+            {/* Ground/Path */}
+            <div className="absolute bottom-8 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent rounded-full" />
+            
+            {/* Walking Hiker */}
+            <div className="absolute bottom-10 animate-[walk_2s_ease-in-out_infinite]">
+              <div className="relative">
                 {/* Backpack */}
-                <rect x="4" y="-4" width="8" height="12" rx="2" className="fill-primary/80" />
-                {/* Legs */}
-                <line x1="-2" y1="8" x2="-5" y2="16" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
-                <line x1="2" y1="8" x2="5" y2="16" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
-                {/* Arms */}
-                <line x1="-6" y1="2" x2="-10" y2="-4" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
-                <line x1="3" y1="2" x2="8" y2="6" className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
-                {/* Walking stick */}
-                <line x1="8" y1="6" x2="14" y2="18" className="stroke-foreground/60" strokeWidth="1.5" strokeLinecap="round" />
-              </g>
-              {/* Flag at peak */}
-              <g>
-                <line x1="100" y1="20" x2="100" y2="5" className="stroke-foreground" strokeWidth="1.5" />
-                <polygon points="100,5 115,10 100,15" className="fill-primary animate-[wave_1s_ease-in-out_infinite]" />
-              </g>
-            </svg>
+                <div className="absolute -right-1 top-3 w-4 h-6 bg-primary/80 rounded-sm" />
+                <div className="absolute -right-0.5 top-2 w-2 h-2 bg-primary rounded-full" />
+                
+                {/* Head */}
+                <div className="w-6 h-6 bg-foreground rounded-full mx-auto" />
+                
+                {/* Body */}
+                <div className="w-4 h-8 bg-foreground rounded-sm mx-auto -mt-1" />
+                
+                {/* Legs - animated */}
+                <div className="flex justify-center gap-1 -mt-1">
+                  <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[leftLeg_0.5s_ease-in-out_infinite]" />
+                  <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[rightLeg_0.5s_ease-in-out_infinite]" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Floating travel icons */}
+            <div className="absolute top-4 left-8 animate-[float_3s_ease-in-out_infinite]">
+              <MapPin className="w-6 h-6 text-primary/60" />
+            </div>
+            <div className="absolute top-8 right-12 animate-[float_3s_ease-in-out_infinite_0.5s]">
+              <Plane className="w-5 h-5 text-primary/50" />
+            </div>
+            <div className="absolute top-2 right-6 animate-[float_3s_ease-in-out_infinite_1s]">
+              <Globe className="w-5 h-5 text-primary/40" />
+            </div>
+            
+            {/* Dotted path ahead */}
+            <div className="absolute bottom-8 right-0 flex gap-2">
+              {[...Array(5)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className="w-2 h-2 rounded-full bg-primary/30 animate-pulse"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                />
+              ))}
+            </div>
           </div>
+          
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-foreground">
               Crafting your perfect trip...
             </h2>
-            <p className="text-muted-foreground max-w-md">
+            <p className="text-muted-foreground max-w-md mx-auto">
               Our AI is creating a detailed itinerary with weather forecasts, transport tips, and optimal timing. This usually takes 20-40 seconds.
             </p>
           </div>
         </div>
         <style>{`
-          @keyframes climb {
-            0%, 100% { transform: translate(50px, 200px); }
-            25% { transform: translate(70px, 165px); }
-            50% { transform: translate(88px, 125px); }
-            75% { transform: translate(92px, 95px); }
+          @keyframes walk {
+            0%, 100% { left: 10%; }
+            50% { left: 45%; }
           }
-          @keyframes wave {
-            0%, 100% { transform: skewY(0deg); }
-            50% { transform: skewY(5deg); }
+          @keyframes leftLeg {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+          }
+          @keyframes rightLeg {
+            0%, 100% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
           }
         `}</style>
       </div>

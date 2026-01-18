@@ -92,7 +92,7 @@ Your response must be valid JSON with this exact structure:
   "plan": {
     "name": "string (creative name for this plan)",
     "theme": "string (e.g., 'Cultural Immersion' or 'Adventure & Nature')",
-    "summary": "string (2-3 sentence overview)",
+    "summary": "string (ONE short sentence, max 15 words)",
     "flights": {
       "outbound": {
         "airline": "string (e.g., 'United Airlines')",

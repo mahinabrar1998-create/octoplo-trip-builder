@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 const EntryCards = () => {
   const navigate = useNavigate();
   const [scratchClicked, setScratchClicked] = useState(false);
@@ -21,15 +20,9 @@ const EntryCards = () => {
               Let Octoplo build it for you
             </h3>
             
-            <p className="text-muted-foreground mb-8 leading-relaxed">
-              Answer a few questions and get two complete trip plans — optimized for your budget, pace, and group.
-            </p>
+            <p className="text-muted-foreground mb-8 leading-relaxed">Answer a few questions and get a complete trip plan.</p>
 
-            <Button 
-              size="lg" 
-              className="w-full rounded-xl font-medium shadow-soft"
-              onClick={() => navigate("/generate")}
-            >
+            <Button size="lg" className="w-full rounded-xl font-medium shadow-soft" onClick={() => navigate("/generate")}>
               Generate my trip
             </Button>
 
@@ -53,19 +46,7 @@ const EntryCards = () => {
               Create your itinerary time-block by time-block. Octoplo suggests activities, costs, and backups as you go.
             </p>
 
-            <Button 
-              variant="outline"
-              size="lg"
-              type="button"
-              aria-pressed={scratchClicked}
-              className={`w-full rounded-xl font-medium transition-colors ${
-                scratchClicked
-                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary"
-                  : "hover:bg-primary hover:text-primary-foreground hover:border-primary active:bg-primary active:text-primary-foreground"
-              }`}
-              onPointerDown={() => setScratchClicked(true)}
-              onClick={() => setScratchClicked(true)}
-            >
+            <Button variant="outline" size="lg" type="button" aria-pressed={scratchClicked} className={`w-full rounded-xl font-medium transition-colors ${scratchClicked ? "bg-primary text-primary-foreground border-primary hover:bg-primary active:bg-primary" : "hover:bg-primary hover:text-primary-foreground hover:border-primary active:bg-primary active:text-primary-foreground"}`} onPointerDown={() => setScratchClicked(true)} onClick={() => setScratchClicked(true)}>
               Start from scratch
             </Button>
 

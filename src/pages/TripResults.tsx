@@ -69,11 +69,11 @@ type TripPlan = {
 };
 
 const categoryColors: Record<string, string> = {
-  food: "bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30",
-  activity: "bg-sky-500/20 text-sky-700 dark:text-sky-300 border-sky-500/30",
-  transport: "bg-violet-500/20 text-violet-700 dark:text-violet-300 border-violet-500/30",
-  accommodation: "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
-  "free-time": "bg-slate-500/20 text-slate-700 dark:text-slate-300 border-slate-500/30",
+  food: "bg-orange-100 text-orange-700 border-orange-200",
+  activity: "bg-blue-100 text-blue-700 border-blue-200",
+  transport: "bg-purple-100 text-purple-700 border-purple-200",
+  accommodation: "bg-green-100 text-green-700 border-green-200",
+  "free-time": "bg-gray-100 text-gray-700 border-gray-200",
 };
 
 const WeatherIcon = ({ condition }: { condition: Weather["condition"] }) => {
@@ -297,8 +297,8 @@ const TripResults = () => {
       <div className="min-h-screen bg-background relative flex items-center justify-center">
         <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-sky-500/10">
-            <Loader2 className="w-10 h-10 text-sky-500 animate-spin" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10">
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-foreground">
@@ -309,7 +309,7 @@ const TripResults = () => {
             </p>
           </div>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="w-4 h-4 text-sky-500" />
+            <Sparkles className="w-4 h-4 text-primary" />
             <span>Powered by Gemini</span>
           </div>
         </div>
@@ -356,7 +356,7 @@ const TripResults = () => {
             Start Over
           </Button>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles className="w-4 h-4 text-sky-500" />
+            <Sparkles className="w-4 h-4 text-primary" />
             AI Generated
           </div>
         </div>
@@ -365,7 +365,7 @@ const TripResults = () => {
       {/* Plan Header */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
         <div className="text-center space-y-4 mb-8">
-          <div className="inline-flex items-center gap-2 bg-sky-500/15 text-sky-700 dark:text-sky-300 px-4 py-2 rounded-full text-sm font-medium border border-sky-500/20">
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
             <Sparkles className="w-4 h-4" />
             {plan.theme}
           </div>
@@ -377,11 +377,11 @@ const TripResults = () => {
           </p>
           <div className="flex items-center justify-center gap-6 text-sm">
             <span className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <DollarSign className="w-4 h-4 text-primary" />
               {plan.estimatedTotalCost}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <Clock className="w-4 h-4 text-primary" />
               {plan.days.length} days
             </span>
           </div>
@@ -407,7 +407,7 @@ const TripResults = () => {
               {plan.packingTips.map((tip, i) => (
                 <span
                   key={i}
-                  className="bg-slate-500/15 text-slate-700 dark:text-slate-200 px-3 py-1 rounded-full text-xs border border-slate-500/20"
+                  className="bg-primary/10 text-foreground px-3 py-1 rounded-full text-xs"
                 >
                   {tip}
                 </span>
@@ -436,7 +436,7 @@ const TripResults = () => {
                   <button className="w-full bg-card rounded-xl p-4 shadow-soft border border-border/50 hover:border-primary/30 transition-all group">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-lg">
+                        <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
                           {day.dayNumber}
                         </div>
                         <div className="text-left">
@@ -520,7 +520,7 @@ const TripResults = () => {
 
                           {/* Transport Note */}
                           {block.transportNote && (
-                            <div className="flex items-start gap-2 text-xs bg-violet-500/15 text-violet-800 dark:text-violet-200 p-2 rounded-lg border border-violet-500/20">
+                            <div className="flex items-start gap-2 text-xs bg-purple-50 text-purple-700 p-2 rounded-lg">
                               <Navigation className="w-3 h-3 mt-0.5 shrink-0" />
                               <span>{block.transportNote}</span>
                             </div>
@@ -528,7 +528,7 @@ const TripResults = () => {
 
                           {/* Weather Consideration */}
                           {block.weatherConsideration && (
-                            <div className="flex items-start gap-2 text-xs bg-sky-500/15 text-sky-800 dark:text-sky-200 p-2 rounded-lg border border-sky-500/20">
+                            <div className="flex items-start gap-2 text-xs bg-blue-50 text-blue-700 p-2 rounded-lg">
                               <Cloud className="w-3 h-3 mt-0.5 shrink-0" />
                               <span>{block.weatherConsideration}</span>
                             </div>

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, Check, X } from "lucide-react";
+import { Sparkles, Loader2, Check, X, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,6 +52,7 @@ interface EditTimeBlockDrawerProps {
   destination: string;
   tripDates: { start: string; end: string };
   onSave: (dayNumber: number, blockIndex: number, updatedBlock: TimeBlock) => void;
+  onDelete?: (dayNumber: number, blockIndex: number) => void;
 }
 
 const categories = [
@@ -71,6 +72,7 @@ export function EditTimeBlockDrawer({
   destination,
   tripDates,
   onSave,
+  onDelete,
 }: EditTimeBlockDrawerProps) {
   const { toast } = useToast();
   const [editedBlock, setEditedBlock] = useState<TimeBlock | null>(null);
@@ -145,6 +147,15 @@ export function EditTimeBlockDrawer({
     onOpenChange(false);
     setSuggestions([]);
     setEditedBlock(null);
+  };
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(dayNumber, blockIndex);
+      onOpenChange(false);
+      setSuggestions([]);
+      setEditedBlock(null);
+    }
   };
 
   if (!block || !editedBlock) return null;
@@ -292,17 +303,25 @@ export function EditTimeBlockDrawer({
             </div>
           </div>
 
-          <DrawerFooter className="flex-row gap-2">
-            <DrawerClose asChild>
-              <Button variant="outline" onClick={handleClose} className="flex-1 gap-1">
-                <X className="w-4 h-4" />
-                Cancel
+          <DrawerFooter className="flex-col gap-2">
+            <div className="flex gap-2">
+              <DrawerClose asChild>
+                <Button variant="outline" onClick={handleClose} className="flex-1 gap-1">
+                  <X className="w-4 h-4" />
+                  Cancel
+                </Button>
+              </DrawerClose>
+              <Button onClick={handleSave} className="flex-1 gap-1">
+                <Check className="w-4 h-4" />
+                Save Changes
               </Button>
-            </DrawerClose>
-            <Button onClick={handleSave} className="flex-1 gap-1">
-              <Check className="w-4 h-4" />
-              Save Changes
-            </Button>
+            </div>
+            {onDelete && (
+              <Button variant="destructive" onClick={handleDelete} className="w-full gap-1">
+                <Trash2 className="w-4 h-4" />
+                Delete Activity
+              </Button>
+            )}
           </DrawerFooter>
         </div>
       </DrawerContent>

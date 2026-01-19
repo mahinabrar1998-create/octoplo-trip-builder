@@ -959,6 +959,7 @@ const BuildTrip = () => {
         destination={destination}
         tripDates={tripDates}
         onSave={handleSaveBlock}
+        onDelete={handleDeleteBlock}
       />
 
       <EditPackingDrawer

@@ -49,6 +49,7 @@ interface EditTimeBlockDrawerProps {
   block: TimeBlock | null;
   dayNumber: number;
   blockIndex: number;
+  isNewBlock?: boolean;
   destination: string;
   tripDates: { start: string; end: string };
   onSave: (dayNumber: number, blockIndex: number, updatedBlock: TimeBlock) => void;
@@ -56,11 +57,12 @@ interface EditTimeBlockDrawerProps {
 }
 
 const categories = [
-  { value: "food", label: "Food" },
-  { value: "activity", label: "Activity" },
-  { value: "transport", label: "Transport" },
-  { value: "accommodation", label: "Accommodation" },
-  { value: "free-time", label: "Free Time" },
+  { value: "food", label: "🍽️ Food" },
+  { value: "activity", label: "🎯 Activity" },
+  { value: "transport", label: "🚗 Transport" },
+  { value: "accommodation", label: "🏨 Accommodation" },
+  { value: "free-time", label: "☕ Free Time" },
+  { value: "shopping", label: "🛍️ Shopping" },
 ];
 
 export function EditTimeBlockDrawer({
@@ -69,6 +71,7 @@ export function EditTimeBlockDrawer({
   block,
   dayNumber,
   blockIndex,
+  isNewBlock = false,
   destination,
   tripDates,
   onSave,
@@ -88,7 +91,7 @@ export function EditTimeBlockDrawer({
   }, [block, open]);
 
   const handleGetSuggestions = async () => {
-    if (!block) return;
+    if (!editedBlock) return;
 
     setLoadingSuggestions(true);
     setSuggestions([]);
@@ -96,7 +99,8 @@ export function EditTimeBlockDrawer({
     try {
       const { data, error } = await supabase.functions.invoke("suggest-alternatives", {
         body: {
-          block,
+          block: editedBlock,
+          category: editedBlock.category,
           destination,
           tripDates,
         },
@@ -165,37 +169,59 @@ export function EditTimeBlockDrawer({
       <DrawerContent className="max-h-[90vh]">
         <div className="overflow-y-auto">
           <DrawerHeader className="text-left">
-            <DrawerTitle>Edit Time Block</DrawerTitle>
+            <DrawerTitle>{isNewBlock ? "Add Activity" : "Edit Activity"}</DrawerTitle>
             <DrawerDescription>
-              Day {dayNumber} • {block.time} - {block.endTime}
+              Day {dayNumber} {editedBlock.time && `• ${editedBlock.time}`}{editedBlock.endTime && ` - ${editedBlock.endTime}`}
             </DrawerDescription>
           </DrawerHeader>
 
           <div className="px-4 space-y-4">
-            {/* AI Suggestions Button */}
-            <Button
-              variant="outline"
-              onClick={handleGetSuggestions}
-              disabled={loadingSuggestions}
-              className="w-full gap-2 border-primary/30 hover:border-primary hover:bg-primary/5"
-            >
-              {loadingSuggestions ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Finding alternatives...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  Get AI Suggestions
-                </>
-              )}
-            </Button>
+            {/* Category Selection - First step */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">What type of activity?</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.value}
+                    onClick={() => setEditedBlock({ ...editedBlock, category: cat.value as TimeBlock["category"] })}
+                    className={`p-2 rounded-lg border text-sm transition-colors ${
+                      editedBlock.category === cat.value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/50 hover:bg-muted"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Suggestions Button - Shows after category selected */}
+            {editedBlock.category && (
+              <Button
+                variant="outline"
+                onClick={handleGetSuggestions}
+                disabled={loadingSuggestions}
+                className="w-full gap-2 border-primary/30 hover:border-primary hover:bg-primary/5"
+              >
+                {loadingSuggestions ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Finding {categories.find(c => c.value === editedBlock.category)?.label.split(" ")[1]} options...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Suggest {categories.find(c => c.value === editedBlock.category)?.label.split(" ")[1]} Ideas
+                  </>
+                )}
+              </Button>
+            )}
 
             {/* Suggestions List */}
             {suggestions.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">AI Alternatives:</p>
+                <p className="text-xs text-muted-foreground font-medium">AI Suggestions:</p>
                 {suggestions.map((suggestion, i) => (
                   <button
                     key={i}
@@ -280,26 +306,6 @@ export function EditTimeBlockDrawer({
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="category" className="text-xs">Category</Label>
-                <Select
-                  value={editedBlock.category}
-                  onValueChange={(value) =>
-                    setEditedBlock({ ...editedBlock, category: value as TimeBlock["category"] })
-                  }
-                >
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </div>
 
@@ -313,11 +319,11 @@ export function EditTimeBlockDrawer({
               </DrawerClose>
               <Button onClick={handleSave} className="flex-1 gap-1">
                 <Check className="w-4 h-4" />
-                Save Changes
+                {isNewBlock ? "Add Activity" : "Save Changes"}
               </Button>
             </div>
-            {onDelete && (
-              <Button variant="destructive" onClick={handleDelete} className="w-full gap-1">
+            {!isNewBlock && onDelete && (
+              <Button variant="ghost" onClick={handleDelete} className="w-full gap-1 text-muted-foreground hover:text-destructive">
                 <Trash2 className="w-4 h-4" />
                 Delete Activity
               </Button>

@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.suggest-alternatives]
 verify_jwt = false
+
+[functions.search-places]
+verify_jwt = false
+
+[functions.search-flights]
+verify_jwt = false
+
+[functions.search-hotels]
+verify_jwt = false
+
+[functions.suggest-flights]
+verify_jwt = false

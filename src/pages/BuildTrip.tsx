@@ -414,7 +414,7 @@ const BuildTrip = () => {
                     currentStep === step.id
                       ? "bg-primary text-primary-foreground"
                       : filledSteps[i]
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground"
                   )}
                 >

@@ -75,7 +75,10 @@ serve(async (req) => {
       );
     }
 
-    console.log("Searching flights:", { origin, destination, departureDate, adults });
+    // Convert ISO timestamp to YYYY-MM-DD format for Amadeus API
+    const formattedDate = departureDate.split("T")[0];
+
+    console.log("Searching flights:", { origin, destination, departureDate: formattedDate, adults });
 
     const token = await getAmadeusToken();
 
@@ -83,7 +86,7 @@ serve(async (req) => {
     const searchParams = new URLSearchParams({
       originLocationCode: origin.toUpperCase(),
       destinationLocationCode: destination.toUpperCase(),
-      departureDate,
+      departureDate: formattedDate,
       adults: adults.toString(),
       max: maxResults.toString(),
       currencyCode: "USD",

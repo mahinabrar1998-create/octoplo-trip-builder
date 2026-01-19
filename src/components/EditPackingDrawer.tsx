@@ -59,18 +59,9 @@ export function EditPackingDrawer({
     try {
       const { data, error } = await supabase.functions.invoke("suggest-alternatives", {
         body: {
-          block: {
-            time: "",
-            endTime: "",
-            title: "Packing List",
-            description: `Packing tips for a trip to ${destination}`,
-            location: destination,
-            estimatedCost: "",
-            category: "accommodation",
-          },
+          type: "packing",
           destination,
           tripDates,
-          context: `Generate 3 essential packing tips for ${destination} from ${tripDates.start} to ${tripDates.end}. Each tip should be 3-5 words only.`,
         },
       });
 

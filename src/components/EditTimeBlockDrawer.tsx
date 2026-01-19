@@ -206,7 +206,7 @@ export function EditTimeBlockDrawer({
               >
                 {loadingSuggestions ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
                     Finding {categories.find(c => c.value === editedBlock.category)?.label.split(" ")[1]} options...
                   </>
                 ) : (
@@ -313,7 +313,7 @@ export function EditTimeBlockDrawer({
             <div className="flex gap-2">
               <DrawerClose asChild>
                 <Button variant="outline" onClick={handleClose} className="flex-1 gap-1">
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-primary" />
                   Cancel
                 </Button>
               </DrawerClose>
@@ -324,7 +324,7 @@ export function EditTimeBlockDrawer({
             </div>
             {!isNewBlock && onDelete && (
               <Button variant="ghost" onClick={handleDelete} className="w-full gap-1 text-muted-foreground hover:text-destructive">
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 text-primary" />
                 Delete Activity
               </Button>
             )}

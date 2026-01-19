@@ -85,6 +85,90 @@ serve(async (req) => {
     const end = new Date(endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
+    // ============ FOURSQUARE INTEGRATION: Fetch real places ============
+    let realPlaces: any = null;
+    const FOURSQUARE_API_KEY = Deno.env.get("FOURSQUARE_API_KEY");
+    
+    if (FOURSQUARE_API_KEY) {
+      console.log("Fetching real places from Foursquare...");
+      
+      try {
+        // Fetch restaurants
+        const restaurantParams = new URLSearchParams({
+          near: destination,
+          categories: "13065,13032,13028", // Restaurants, Cafes, Breakfast
+          limit: "25",
+          sort: "RELEVANCE",
+          fields: "fsq_id,name,location,categories,rating,price,description",
+        });
+        
+        const restaurantResponse = await fetch(
+          `https://api.foursquare.com/v3/places/search?${restaurantParams}`,
+          {
+            headers: {
+              Authorization: FOURSQUARE_API_KEY,
+              Accept: "application/json",
+            },
+          }
+        );
+
+        // Fetch attractions
+        const attractionParams = new URLSearchParams({
+          near: destination,
+          categories: "16000,10027,16032", // Landmarks, Museums, Parks
+          limit: "25",
+          sort: "RELEVANCE",
+          fields: "fsq_id,name,location,categories,rating,description",
+        });
+        
+        const attractionResponse = await fetch(
+          `https://api.foursquare.com/v3/places/search?${attractionParams}`,
+          {
+            headers: {
+              Authorization: FOURSQUARE_API_KEY,
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (restaurantResponse.ok && attractionResponse.ok) {
+          const restaurants = await restaurantResponse.json();
+          const attractions = await attractionResponse.json();
+          
+          // Format places for the AI prompt
+          const formatPlace = (place: any) => {
+            const address = place.location?.formatted_address || 
+              [place.location?.address, place.location?.locality].filter(Boolean).join(", ");
+            const category = place.categories?.[0]?.name || "Venue";
+            const priceMap: Record<number, string> = { 1: "$", 2: "$$", 3: "$$$", 4: "$$$$" };
+            const price = priceMap[place.price] || "$$";
+            
+            return {
+              name: place.name,
+              address,
+              category,
+              rating: place.rating ? (place.rating / 2).toFixed(1) : null,
+              price,
+              neighborhood: place.location?.locality || place.location?.neighborhood || "",
+            };
+          };
+
+          realPlaces = {
+            restaurants: restaurants.results?.map(formatPlace) || [],
+            attractions: attractions.results?.map(formatPlace) || [],
+          };
+          
+          console.log(`Fetched ${realPlaces.restaurants.length} restaurants and ${realPlaces.attractions.length} attractions from Foursquare`);
+        } else {
+          console.warn("Foursquare API returned non-OK status, continuing without real places");
+        }
+      } catch (fsqError) {
+        console.warn("Error fetching from Foursquare, continuing without real places:", fsqError);
+      }
+    } else {
+      console.log("Foursquare API key not configured, using AI-generated places");
+    }
+
     const systemPrompt = `You are an expert travel planner creating HIGHLY DETAILED trip itineraries. You must consider real-world factors like weather patterns, traffic conditions, transportation availability, and optimal timing.
 
 Your response must be valid JSON with this exact structure:
@@ -182,6 +266,27 @@ CRITICAL Guidelines for DETAILED planning:
 - **PACKING TIPS**: Include exactly 3 short packing tips (3-5 words each)`;
 
 
+    // Build the real places context for the AI
+    let realPlacesContext = "";
+    if (realPlaces && (realPlaces.restaurants.length > 0 || realPlaces.attractions.length > 0)) {
+      realPlacesContext = `
+
+## VERIFIED REAL PLACES (from Foursquare - USE THESE EXCLUSIVELY)
+
+### Restaurants & Cafes (verified):
+${realPlaces.restaurants.slice(0, 15).map((r: any, i: number) => 
+  `${i + 1}. **${r.name}** - ${r.category} | ${r.address} | Price: ${r.price}${r.rating ? ` | Rating: ${r.rating}/5` : ""}`
+).join("\n")}
+
+### Attractions & Activities (verified):
+${realPlaces.attractions.slice(0, 15).map((a: any, i: number) => 
+  `${i + 1}. **${a.name}** - ${a.category} | ${a.address}${a.rating ? ` | Rating: ${a.rating}/5` : ""}`
+).join("\n")}
+
+**CRITICAL**: You MUST ONLY use restaurants and attractions from the lists above. Do NOT invent or hallucinate venue names. Every restaurant, cafe, and attraction in your itinerary MUST be from these verified lists.
+`;
+    }
+
     const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.
 
 Trip Details:
@@ -190,6 +295,7 @@ Trip Details:
 - Group: ${groupSize}
 - Preferred Vibes: ${vibe.join(', ')}
 ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
+${realPlacesContext}
 
 IMPORTANT Requirements:
 1. **FLIGHT TIMING IS CRITICAL**: 
@@ -200,7 +306,7 @@ IMPORTANT Requirements:
 4. Consider traffic patterns (avoid scheduling across town during rush hour)
 5. Include specific transport instructions between each activity
 6. Account for opening hours and peak tourist times
-7. Name specific restaurants, attractions, and venues - not generic descriptions
+${realPlaces ? "7. **USE ONLY THE VERIFIED PLACES PROVIDED ABOVE** - do not make up restaurant or attraction names" : "7. Name specific restaurants, attractions, and venues - not generic descriptions"}
 8. Include buffer time and realistic durations for each activity
 9. All costs must be in US dollars ($)
 

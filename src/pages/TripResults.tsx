@@ -208,76 +208,13 @@ const TripResults = () => {
     toast({ title: "Accommodation updated" });
   };
 
-  // Generate AI hero image for the destination
-  const generateHeroImage = async (destination: string, theme: string): Promise<string> => {
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-hero-image", {
-        body: { destination, theme },
-      });
+  // Simple save without hero image generation
 
-      if (error) {
-        console.error("Error generating hero image:", error);
-        throw error;
-      }
-
-      if (data?.imageUrl) {
-        return data.imageUrl;
-      }
-
-      throw new Error("No image URL returned");
-    } catch (err) {
-      console.error("Failed to generate hero image:", err);
-      return "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&h=1080&fit=crop";
-    }
-  };
-
-  // Generate destination theme colors
-  const getDestinationTheme = (destination: string): { primary: string; secondary: string; accent: string; gradient: string } => {
-    const dest = destination.toLowerCase();
-    
-    if (dest.includes("bali") || dest.includes("hawaii") || dest.includes("maldives") || dest.includes("caribbean") || dest.includes("fiji")) {
-      return { primary: "158 64% 52%", secondary: "180 60% 90%", accent: "43 96% 56%", gradient: "from-teal-500/20 via-cyan-400/10 to-yellow-400/20" };
-    }
-    if (dest.includes("paris") || dest.includes("rome") || dest.includes("venice") || dest.includes("florence")) {
-      return { primary: "15 80% 50%", secondary: "30 50% 95%", accent: "45 93% 47%", gradient: "from-amber-500/20 via-orange-400/10 to-rose-400/20" };
-    }
-    if (dest.includes("iceland") || dest.includes("norway") || dest.includes("sweden") || dest.includes("finland") || dest.includes("alaska")) {
-      return { primary: "200 80% 50%", secondary: "200 30% 95%", accent: "170 80% 40%", gradient: "from-blue-400/20 via-cyan-300/10 to-teal-400/20" };
-    }
-    if (dest.includes("tokyo") || dest.includes("japan") || dest.includes("kyoto")) {
-      return { primary: "350 80% 60%", secondary: "350 20% 95%", accent: "150 50% 45%", gradient: "from-pink-400/20 via-rose-300/10 to-green-400/20" };
-    }
-    if (dest.includes("thailand") || dest.includes("bangkok") || dest.includes("vietnam")) {
-      return { primary: "35 90% 55%", secondary: "35 40% 95%", accent: "160 60% 45%", gradient: "from-orange-400/20 via-amber-300/10 to-emerald-400/20" };
-    }
-    if (dest.includes("dubai") || dest.includes("morocco") || dest.includes("egypt") || dest.includes("jordan")) {
-      return { primary: "30 70% 50%", secondary: "30 30% 95%", accent: "20 80% 45%", gradient: "from-amber-500/20 via-orange-400/10 to-red-400/20" };
-    }
-    if (dest.includes("switzerland") || dest.includes("alps") || dest.includes("colorado") || dest.includes("aspen") || dest.includes("breckenridge")) {
-      return { primary: "210 60% 50%", secondary: "210 20% 95%", accent: "150 60% 40%", gradient: "from-blue-400/20 via-slate-300/10 to-emerald-400/20" };
-    }
-    if (dest.includes("miami") || dest.includes("cancun") || dest.includes("bahamas")) {
-      return { primary: "185 70% 50%", secondary: "185 30% 95%", accent: "330 70% 55%", gradient: "from-cyan-400/20 via-teal-300/10 to-pink-400/20" };
-    }
-    if (dest.includes("new york") || dest.includes("london") || dest.includes("singapore") || dest.includes("hong kong")) {
-      return { primary: "220 60% 45%", secondary: "220 20% 95%", accent: "40 80% 50%", gradient: "from-slate-400/20 via-gray-300/10 to-amber-400/20" };
-    }
-    return { primary: "20 80% 55%", secondary: "20 30% 95%", accent: "180 60% 45%", gradient: "from-orange-400/20 via-amber-300/10 to-teal-400/20" };
-  };
-
-  const handlePublish = async () => {
+  const handleSave = async () => {
     if (!plan || !tripData) return;
 
     setPublishing(true);
     try {
-      toast({
-        title: "Generating your website...",
-        description: "Creating a custom hero image for your trip.",
-      });
-
-      const heroImageUrl = await generateHeroImage(tripData.destination, plan.theme);
-      const themeColors = getDestinationTheme(tripData.destination);
-      
       const { data, error: insertError } = await supabase
         .from("published_trips" as never)
         .insert({
@@ -285,8 +222,9 @@ const TripResults = () => {
           start_date: tripData.startDate,
           end_date: tripData.endDate,
           plan: plan as unknown,
-          hero_image_url: heroImageUrl,
-          theme_colors: themeColors as unknown,
+          name: plan.name,
+          hero_image_url: "",
+          theme_colors: {} as unknown,
         } as never)
         .select("id")
         .single();
@@ -298,13 +236,13 @@ const TripResults = () => {
       setPublishedUrl(url);
       
       toast({
-        title: "Trip Published! 🎉",
-        description: "Your trip website is ready to share.",
+        title: "Plan Saved! 🎉",
+        description: "You can now share your plan with others.",
       });
     } catch (err) {
-      console.error("Error publishing trip:", err);
+      console.error("Error saving trip:", err);
       toast({
-        title: "Failed to publish",
+        title: "Failed to save",
         description: "Please try again.",
         variant: "destructive",
       });
@@ -790,32 +728,32 @@ const TripResults = () => {
           })}
         </div>
 
-        {/* CTA - Publish Website */}
+        {/* CTA - Save Plan */}
         <div className="text-center mt-10 pb-8 space-y-4">
           {!publishedUrl ? (
             <Button
               size="lg"
-              onClick={handlePublish}
+              onClick={handleSave}
               disabled={publishing}
               className="px-6 py-5 text-base rounded-xl gap-2"
             >
               {publishing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Publishing...
+                  Saving...
                 </>
               ) : (
                 <>
-                  <Globe className="w-4 h-4" />
-                  Publish Website
+                  <Check className="w-4 h-4" />
+                  Save Plan
                 </>
               )}
             </Button>
           ) : (
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm">
                 <Check className="w-4 h-4" />
-                Website Published!
+                Plan Saved!
               </div>
               <div className="flex items-center justify-center gap-2">
                 <input
@@ -828,15 +766,25 @@ const TripResults = () => {
                   {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(publishedUrl, "_blank")}
-                className="gap-2"
-              >
-                <Globe className="w-4 h-4" />
-                View Website
-              </Button>
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(publishedUrl, "_blank")}
+                  className="gap-2"
+                >
+                  <Globe className="w-4 h-4" />
+                  View Plan
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/saved")}
+                  className="gap-2"
+                >
+                  All Saved Plans
+                </Button>
+              </div>
             </div>
           )}
         </div>

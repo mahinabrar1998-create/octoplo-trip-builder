@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, Check, X, Trash2 } from "lucide-react";
+import { Sparkles, Loader2, Check, X, Trash2, UtensilsCrossed, MapPin, Car, Hotel, Coffee, ShoppingBag, LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -56,13 +56,13 @@ interface EditTimeBlockDrawerProps {
   onDelete?: (dayNumber: number, blockIndex: number) => void;
 }
 
-const categories = [
-  { value: "food", label: "🍽️ Food" },
-  { value: "activity", label: "🎯 Activity" },
-  { value: "transport", label: "🚗 Transport" },
-  { value: "accommodation", label: "🏨 Accommodation" },
-  { value: "free-time", label: "☕ Free Time" },
-  { value: "shopping", label: "🛍️ Shopping" },
+const categories: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "food", label: "Food", icon: UtensilsCrossed },
+  { value: "activity", label: "Activity", icon: MapPin },
+  { value: "transport", label: "Transport", icon: Car },
+  { value: "accommodation", label: "Stay", icon: Hotel },
+  { value: "free-time", label: "Free Time", icon: Coffee },
+  { value: "shopping", label: "Shopping", icon: ShoppingBag },
 ];
 
 export function EditTimeBlockDrawer({
@@ -180,19 +180,23 @@ export function EditTimeBlockDrawer({
             <div className="space-y-2">
               <Label className="text-xs font-medium">What type of activity?</Label>
               <div className="grid grid-cols-3 gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat.value}
-                    onClick={() => setEditedBlock({ ...editedBlock, category: cat.value as TimeBlock["category"] })}
-                    className={`p-2 rounded-lg border text-sm transition-colors ${
-                      editedBlock.category === cat.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border hover:border-primary/50 hover:bg-muted"
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+                {categories.map((cat) => {
+                  const Icon = cat.icon;
+                  return (
+                    <button
+                      key={cat.value}
+                      onClick={() => setEditedBlock({ ...editedBlock, category: cat.value as TimeBlock["category"] })}
+                      className={`p-2 rounded-lg border text-sm transition-colors flex flex-col items-center gap-1 ${
+                        editedBlock.category === cat.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50 hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 text-primary" />
+                      <span className="text-xs">{cat.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

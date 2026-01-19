@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -77,17 +77,13 @@ export function EditTimeBlockDrawer({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  // Initialize edited block when drawer opens
-  useState(() => {
+  // Initialize/reset edited block when drawer opens or block changes
+  useEffect(() => {
     if (block && open) {
       setEditedBlock({ ...block });
+      setSuggestions([]);
     }
-  });
-
-  // Update edited block when block prop changes
-  if (block && (!editedBlock || editedBlock.title !== block.title)) {
-    setEditedBlock({ ...block });
-  }
+  }, [block, open]);
 
   const handleGetSuggestions = async () => {
     if (!block) return;

@@ -381,7 +381,7 @@ export function EditFlightsDrawer({
                 onClick={() => setActiveTab("outbound")}
                 className="flex-1"
               >
-                Outbound ({tripDates.start})
+                Outbound ({tripDates.start.split("T")[0]})
               </Button>
               <Button
                 variant={activeTab === "return" ? "default" : "outline"}
@@ -389,7 +389,7 @@ export function EditFlightsDrawer({
                 onClick={() => setActiveTab("return")}
                 className="flex-1"
               >
-                Return ({tripDates.end})
+                Inbound ({tripDates.end.split("T")[0]})
               </Button>
             </div>
 

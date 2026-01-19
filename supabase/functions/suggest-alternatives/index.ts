@@ -16,10 +16,11 @@ interface TimeBlock {
 }
 
 interface SuggestionRequest {
-  block: TimeBlock;
+  block?: TimeBlock;
   destination: string;
   tripDates: { start: string; end: string };
-  context?: string; // surrounding activities, budget, etc.
+  context?: string;
+  type?: "packing" | "activity";
 }
 
 serve(async (req) => {
@@ -28,11 +29,87 @@ serve(async (req) => {
   }
 
   try {
-    const { block, destination, tripDates, context } = await req.json() as SuggestionRequest;
+    const { block, destination, tripDates, context, type } = await req.json() as SuggestionRequest;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Handle packing tips request
+    if (type === "packing") {
+      console.log("Generating packing tips for:", destination);
+
+      const packingSystemPrompt = `You are a travel packing expert. Generate exactly 3 essential packing tips for a trip.
+
+Each tip should be 3-5 words only (e.g., "Comfortable walking shoes", "Light layers for evenings", "Portable phone charger").
+
+Return a JSON object with this exact structure:
+{
+  "suggestions": [
+    { "title": "3-5 word packing tip" },
+    { "title": "3-5 word packing tip" },
+    { "title": "3-5 word packing tip" }
+  ]
+}`;
+
+      const packingUserPrompt = `Generate 3 essential packing tips for a trip to ${destination} from ${tripDates.start} to ${tripDates.end}. Consider the weather, activities, and culture of the destination. Each tip should be exactly 3-5 words.`;
+
+      const packingResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: packingSystemPrompt },
+            { role: "user", content: packingUserPrompt },
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      if (!packingResponse.ok) {
+        if (packingResponse.status === 429) {
+          return new Response(
+            JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
+            { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        if (packingResponse.status === 402) {
+          return new Response(
+            JSON.stringify({ error: "AI usage limit reached. Please add credits." }),
+            { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        throw new Error("Failed to get AI suggestions");
+      }
+
+      const packingData = await packingResponse.json();
+      const packingContent = packingData.choices?.[0]?.message?.content;
+
+      if (!packingContent) {
+        throw new Error("No content in AI response");
+      }
+
+      const packingJsonMatch = packingContent.match(/\{[\s\S]*\}/);
+      if (!packingJsonMatch) {
+        throw new Error("Could not parse suggestions from AI response");
+      }
+
+      const packingSuggestions = JSON.parse(packingJsonMatch[0]);
+      console.log("Generated packing tips:", packingSuggestions);
+
+      return new Response(JSON.stringify(packingSuggestions), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Handle activity alternatives request
+    if (!block) {
+      throw new Error("Block is required for activity suggestions");
     }
 
     console.log("Generating alternatives for:", block.title, "in", destination);

@@ -19,8 +19,9 @@ export type Database = {
           created_at: string
           destination: string
           end_date: string
-          hero_image_url: string
+          hero_image_url: string | null
           id: string
+          name: string | null
           plan: Json
           start_date: string
           theme_colors: Json | null
@@ -29,8 +30,9 @@ export type Database = {
           created_at?: string
           destination: string
           end_date: string
-          hero_image_url: string
+          hero_image_url?: string | null
           id?: string
+          name?: string | null
           plan: Json
           start_date: string
           theme_colors?: Json | null
@@ -39,8 +41,9 @@ export type Database = {
           created_at?: string
           destination?: string
           end_date?: string
-          hero_image_url?: string
+          hero_image_url?: string | null
           id?: string
+          name?: string | null
           plan?: Json
           start_date?: string
           theme_colors?: Json | null

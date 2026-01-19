@@ -735,8 +735,8 @@ const BuildTrip = () => {
                           onClick={() => handleEditBlock(block, day.dayNumber, i)}
                           className="w-full text-left flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group"
                         >
-                          <div className="text-xs text-muted-foreground w-12">
-                            {block.time}
+                          <div className="text-xs text-muted-foreground w-20 shrink-0">
+                            {block.time || "—"}{block.endTime ? ` - ${block.endTime}` : ""}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-sm text-foreground truncate">

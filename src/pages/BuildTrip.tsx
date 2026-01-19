@@ -956,6 +956,7 @@ const BuildTrip = () => {
         block={editingBlock?.block || null}
         dayNumber={editingBlock?.dayNumber || 1}
         blockIndex={editingBlock?.blockIndex || 0}
+        isNewBlock={editingBlock ? editingBlock.blockIndex >= (days.find(d => d.dayNumber === editingBlock.dayNumber)?.blocks.length || 0) : true}
         destination={destination}
         tripDates={tripDates}
         onSave={handleSaveBlock}

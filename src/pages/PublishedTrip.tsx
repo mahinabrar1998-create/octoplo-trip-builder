@@ -416,9 +416,8 @@ const PublishedTrip = () => {
                       className="bg-card rounded-lg p-3 border border-border/30 shadow-sm"
                     >
                       <div className="flex items-start gap-3">
-                        <div className="text-xs text-muted-foreground pt-0.5 w-28 sm:w-32 flex-shrink-0">
-                          <span className="whitespace-nowrap">{block.time}</span>
-                          <span className="whitespace-nowrap"> - {block.endTime || "—"}</span>
+                        <div className="text-xs text-muted-foreground pt-0.5 w-20 flex-shrink-0 leading-relaxed">
+                          {block.time} - {block.endTime || "—"}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">

@@ -97,10 +97,14 @@ const GuestResponsesSummary = ({ open, onOpenChange, tripId, tripName, days }: P
     }
   };
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
-      fetchData();
+  useEffect(() => {
+    if (open) {
+      void fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tripId]);
+
+  const handleOpenChange = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
 

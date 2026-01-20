@@ -70,10 +70,14 @@ const InviteGuestsDrawer = ({ open, onOpenChange, tripId, tripName }: Props) => 
     }
   };
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (isOpen) {
-      fetchInvites();
+  useEffect(() => {
+    if (open) {
+      void fetchInvites();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tripId]);
+
+  const handleOpenChange = (isOpen: boolean) => {
     onOpenChange(isOpen);
   };
 

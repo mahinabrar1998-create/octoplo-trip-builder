@@ -50,6 +50,76 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_block_responses: {
+        Row: {
+          block_index: number
+          day_index: number
+          id: string
+          invite_id: string
+          response: Database["public"]["Enums"]["guest_response_type"]
+          updated_at: string
+        }
+        Insert: {
+          block_index: number
+          day_index: number
+          id?: string
+          invite_id: string
+          response?: Database["public"]["Enums"]["guest_response_type"]
+          updated_at?: string
+        }
+        Update: {
+          block_index?: number
+          day_index?: number
+          id?: string
+          invite_id?: string
+          response?: Database["public"]["Enums"]["guest_response_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_block_responses_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "trip_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trip_invites: {
+        Row: {
+          created_at: string
+          guest_email: string
+          guest_name: string
+          id: string
+          invite_token: string
+          trip_id: string
+        }
+        Insert: {
+          created_at?: string
+          guest_email: string
+          guest_name: string
+          id?: string
+          invite_token?: string
+          trip_id: string
+        }
+        Update: {
+          created_at?: string
+          guest_email?: string
+          guest_name?: string
+          id?: string
+          invite_token?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_invites_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "published_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -58,7 +128,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      guest_response_type: "going" | "maybe" | "not_going"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -185,6 +255,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      guest_response_type: ["going", "maybe", "not_going"],
+    },
   },
 } as const

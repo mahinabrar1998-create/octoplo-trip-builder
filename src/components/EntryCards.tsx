@@ -3,7 +3,7 @@ import { Sparkles, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 const EntryCards = () => {
   const navigate = useNavigate();
-  return <section id="how-it-works" className="py-12 px-6 md:py-[8px] pb-[20px]">
+  return <section id="how-it-works" className="py-12 px-6 md:py-[8px] pb-[20px] pt-0">
       <div className="max-w-4xl mx-auto">
         <div className="grid md:grid-cols-2 gap-6">
           {/* Primary Card - AI Generated */}

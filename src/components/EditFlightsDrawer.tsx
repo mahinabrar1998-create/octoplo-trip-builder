@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Loader2, Check, X, Plane, MapPin, Navigation, Search, AlertCircle } from "lucide-react";
+import { Sparkles, Loader2, Check, X, Plane, MapPin, Navigation, Search, AlertCircle, DollarSign, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -159,6 +159,7 @@ export function EditFlightsDrawer({
   const [searchError, setSearchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"outbound" | "return">("outbound");
   const [userLocation, setUserLocation] = useState<string>("");
+  const [flightPreference, setFlightPreference] = useState<"cheapest" | "fastest" | null>(null);
   const [detectingLocation, setDetectingLocation] = useState(false);
 
   useEffect(() => {
@@ -225,6 +226,15 @@ export function EditFlightsDrawer({
       return;
     }
 
+    if (!flightPreference) {
+      toast({
+        title: "Select flight preference",
+        description: "Please choose Cheapest or Fastest before searching.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSearching(type);
     setSearchError(null);
 
@@ -233,7 +243,7 @@ export function EditFlightsDrawer({
       const destCode = getAirportCode(type === "outbound" ? destination : userLocation);
       const date = type === "outbound" ? tripDates.start : tripDates.end;
 
-      console.log(`Searching ${type} flights: ${originCode} → ${destCode} on ${date}`);
+      console.log(`Searching ${type} flights: ${originCode} → ${destCode} on ${date} (${flightPreference})`);
 
       const { data, error } = await supabase.functions.invoke("search-flights", {
         body: {
@@ -242,6 +252,7 @@ export function EditFlightsDrawer({
           departureDate: date,
           adults: 1,
           maxResults: 3,
+          sortBy: flightPreference,
         },
       });
 
@@ -373,6 +384,31 @@ export function EditFlightsDrawer({
               )}
             </div>
 
+            {/* Flight Preference Selector */}
+            <div className="space-y-1.5">
+              <Label className="text-xs">What type of flight do you prefer?</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={flightPreference === "cheapest" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFlightPreference("cheapest")}
+                  className="flex-1 gap-1.5"
+                >
+                  <DollarSign className="w-4 h-4" />
+                  Cheapest
+                </Button>
+                <Button
+                  variant={flightPreference === "fastest" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFlightPreference("fastest")}
+                  className="flex-1 gap-1.5"
+                >
+                  <Clock className="w-4 h-4" />
+                  Fastest
+                </Button>
+              </div>
+            </div>
+
             {/* Tab Switcher */}
             <div className="flex gap-2">
               <Button
@@ -396,18 +432,18 @@ export function EditFlightsDrawer({
             {/* Search Button */}
             <Button
               onClick={() => searchRealFlights(activeTab)}
-              disabled={searching !== null || !userLocation}
+              disabled={searching !== null || !userLocation || !flightPreference}
               className="w-full gap-2"
             >
               {searching === activeTab ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Searching flights...
+                  Searching {flightPreference} flights...
                 </>
               ) : (
                 <>
                   <Search className="w-4 h-4" />
-                  Search Real Flights
+                  Search {flightPreference ? `${flightPreference.charAt(0).toUpperCase() + flightPreference.slice(1)} Flights` : "Real Flights"}
                 </>
               )}
             </Button>

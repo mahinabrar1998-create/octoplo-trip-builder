@@ -11,6 +11,7 @@ interface FlightSearchRequest {
   departureDate: string; // YYYY-MM-DD
   adults?: number;
   maxResults?: number;
+  sortBy?: "cheapest" | "fastest"; // Sort preference
 }
 
 // Cache for access token
@@ -66,7 +67,7 @@ serve(async (req) => {
   }
 
   try {
-    const { origin, destination, departureDate, adults = 1, maxResults = 5 } = await req.json() as FlightSearchRequest;
+    const { origin, destination, departureDate, adults = 1, maxResults = 5, sortBy = "cheapest" } = await req.json() as FlightSearchRequest;
 
     if (!origin || !destination || !departureDate) {
       return new Response(
@@ -78,17 +79,17 @@ serve(async (req) => {
     // Convert ISO timestamp to YYYY-MM-DD format for Amadeus API
     const formattedDate = departureDate.split("T")[0];
 
-    console.log("Searching flights:", { origin, destination, departureDate: formattedDate, adults });
+    console.log("Searching flights:", { origin, destination, departureDate: formattedDate, adults, sortBy });
 
     const token = await getAmadeusToken();
 
-    // Search for flight offers
+    // Search for flight offers - fetch more results so we can sort and return best ones
     const searchParams = new URLSearchParams({
       originLocationCode: origin.toUpperCase(),
       destinationLocationCode: destination.toUpperCase(),
       departureDate: formattedDate,
       adults: adults.toString(),
-      max: maxResults.toString(),
+      max: "10", // Fetch more to sort properly
       currencyCode: "USD",
     });
 
@@ -118,7 +119,7 @@ serve(async (req) => {
     const flightData = await flightResponse.json();
     
     // Transform Amadeus response to our format
-    const flights = flightData.data?.map((offer: any) => {
+    let flights = flightData.data?.map((offer: any) => {
       const firstSegment = offer.itineraries[0]?.segments[0];
       const lastSegment = offer.itineraries[0]?.segments[offer.itineraries[0].segments.length - 1];
       
@@ -126,8 +127,10 @@ serve(async (req) => {
       const carrierCode = firstSegment?.carrierCode;
       const carrierName = flightData.dictionaries?.carriers?.[carrierCode] || carrierCode;
       
-      // Calculate total duration
-      const duration = offer.itineraries[0]?.duration?.replace("PT", "").toLowerCase() || "";
+      // Calculate total duration in minutes for sorting
+      const durationStr = offer.itineraries[0]?.duration || "";
+      const durationMinutes = parseDurationToMinutes(durationStr);
+      const duration = durationStr.replace("PT", "").toLowerCase();
       
       // Format times
       const departureTime = firstSegment?.departure?.at?.split("T")[1]?.substring(0, 5) || "";
@@ -142,8 +145,10 @@ serve(async (req) => {
         departureTime,
         arrivalTime,
         duration: formatDuration(duration),
+        durationMinutes,
         stops,
         price: offer.price?.total || "N/A",
+        priceNum: parseFloat(offer.price?.total) || 0,
         currency: offer.price?.currency || "USD",
         cabinClass: offer.travelerPricings?.[0]?.fareDetailsBySegment?.[0]?.cabin || "ECONOMY",
         departureAirport: firstSegment?.departure?.iataCode || origin,
@@ -151,10 +156,21 @@ serve(async (req) => {
       };
     }) || [];
 
-    console.log(`Found ${flights.length} flights`);
+    // Sort based on preference
+    if (sortBy === "fastest") {
+      flights.sort((a: any, b: any) => a.durationMinutes - b.durationMinutes);
+    } else {
+      // Default to cheapest
+      flights.sort((a: any, b: any) => a.priceNum - b.priceNum);
+    }
+
+    // Limit to requested number and clean up internal fields
+    flights = flights.slice(0, maxResults).map(({ durationMinutes, priceNum, ...rest }: any) => rest);
+
+    console.log(`Found ${flights.length} flights (sorted by ${sortBy})`);
 
     return new Response(
-      JSON.stringify({ flights, source: "amadeus" }),
+      JSON.stringify({ flights, source: "amadeus", sortedBy: sortBy }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
@@ -169,4 +185,13 @@ serve(async (req) => {
 function formatDuration(duration: string): string {
   // Convert "5h30m" to "5h 30m"
   return duration.replace(/(\d+)h/, "$1h ").replace(/(\d+)m/, "$1m").trim();
+}
+
+function parseDurationToMinutes(duration: string): number {
+  // Parse ISO 8601 duration like "PT5H30M" to minutes
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  if (!match) return 0;
+  const hours = parseInt(match[1] || "0", 10);
+  const minutes = parseInt(match[2] || "0", 10);
+  return hours * 60 + minutes;
 }

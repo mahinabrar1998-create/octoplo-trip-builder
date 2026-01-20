@@ -59,6 +59,12 @@ const GuestResponsesSummary = ({ open, onOpenChange, tripId, tripName, days }: P
   const [responses, setResponses] = useState<BlockResponse[]>([]);
   const [openDays, setOpenDays] = useState<number[]>([1]);
 
+  // Reset state when tripId changes
+  useEffect(() => {
+    setInvites([]);
+    setResponses([]);
+  }, [tripId]);
+
   const fetchData = async () => {
     setLoading(true);
     try {

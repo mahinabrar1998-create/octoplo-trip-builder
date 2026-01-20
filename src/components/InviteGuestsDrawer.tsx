@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,7 +44,15 @@ const InviteGuestsDrawer = ({ open, onOpenChange, tripId, tripName }: Props) => 
   const [sending, setSending] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Reset state when tripId changes
+  useEffect(() => {
+    setInvites([]);
+    setGuestName("");
+    setGuestEmail("");
+  }, [tripId]);
+
   const fetchInvites = async () => {
+    if (!tripId) return;
     setLoading(true);
     try {
       const { data, error } = await supabase

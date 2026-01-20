@@ -10,6 +10,7 @@ import TripResults from "./pages/TripResults";
 import BuildTrip from "./pages/BuildTrip";
 import PublishedTrip from "./pages/PublishedTrip";
 import SavedPlans from "./pages/SavedPlans";
+import GuestResponse from "./pages/GuestResponse";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/results" element={<TripResults />} />
           <Route path="/build" element={<BuildTrip />} />
           <Route path="/trip/:tripId" element={<PublishedTrip />} />
+          <Route path="/trip/:tripId/respond/:token" element={<GuestResponse />} />
           <Route path="/saved" element={<SavedPlans />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

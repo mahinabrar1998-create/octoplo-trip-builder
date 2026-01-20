@@ -13,9 +13,14 @@ import {
   ExternalLink,
   Copy,
   Check,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import DeleteTripDialog from "@/components/DeleteTripDialog";
+import InviteGuestsDrawer from "@/components/InviteGuestsDrawer";
+import GuestResponsesSummary from "@/components/GuestResponsesSummary";
 
 type SavedTrip = {
   id: string;
@@ -26,7 +31,7 @@ type SavedTrip = {
   created_at: string;
   plan: {
     name: string;
-    days: { blocks: unknown[] }[];
+    days: { dayNumber: number; date: string; blocks: { title: string; time: string; endTime: string }[] }[];
   };
 };
 
@@ -36,6 +41,16 @@ const SavedPlans = () => {
   const [trips, setTrips] = useState<SavedTrip[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState<SavedTrip | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  
+  // Invite state
+  const [inviteTarget, setInviteTarget] = useState<SavedTrip | null>(null);
+  
+  // Responses state
+  const [responsesTarget, setResponsesTarget] = useState<SavedTrip | null>(null);
 
   useEffect(() => {
     fetchTrips();
@@ -71,6 +86,33 @@ const SavedPlans = () => {
       title: "Link copied!",
       description: "Share it with your travel companions.",
     });
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    
+    setDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("published_trips" as never)
+        .delete()
+        .eq("id", deleteTarget.id);
+
+      if (error) throw error;
+      
+      setTrips((prev) => prev.filter((t) => t.id !== deleteTarget.id));
+      toast({ title: "Trip deleted" });
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error("Error deleting trip:", err);
+      toast({
+        title: "Error",
+        description: "Failed to delete trip.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -151,28 +193,39 @@ const SavedPlans = () => {
                     key={trip.id}
                     className="bg-card rounded-xl p-4 border border-border/50 shadow-soft hover:border-primary/40 transition-all"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground truncate">
-                          {trip.name || trip.plan?.name || `Trip to ${trip.destination}`}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                          <MapPin className="w-3.5 h-3.5" />
-                          <span>{trip.destination}</span>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground truncate">
+                            {trip.name || trip.plan?.name || `Trip to ${trip.destination}`}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <MapPin className="w-3.5 h-3.5" />
+                            <span>{trip.destination}</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-2">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {daysCount} days, {activitiesCount} activities
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-2">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {daysCount} days, {activitiesCount} activities
-                          </span>
-                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteTarget(trip)}
+                          className="text-muted-foreground hover:text-destructive shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Button
                           variant="outline"
                           size="sm"
@@ -195,6 +248,24 @@ const SavedPlans = () => {
                           <ExternalLink className="w-3.5 h-3.5" />
                           View
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setInviteTarget(trip)}
+                          className="gap-1.5"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          Invite
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setResponsesTarget(trip)}
+                          className="gap-1.5"
+                        >
+                          <Users className="w-3.5 h-3.5" />
+                          Responses
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -204,6 +275,32 @@ const SavedPlans = () => {
           </div>
         )}
       </div>
+
+      {/* Delete Dialog */}
+      <DeleteTripDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        tripName={deleteTarget?.name || deleteTarget?.plan?.name || "this trip"}
+        loading={deleting}
+      />
+
+      {/* Invite Drawer */}
+      <InviteGuestsDrawer
+        open={!!inviteTarget}
+        onOpenChange={(open) => !open && setInviteTarget(null)}
+        tripId={inviteTarget?.id || ""}
+        tripName={inviteTarget?.name || inviteTarget?.plan?.name || "this trip"}
+      />
+
+      {/* Responses Summary Drawer */}
+      <GuestResponsesSummary
+        open={!!responsesTarget}
+        onOpenChange={(open) => !open && setResponsesTarget(null)}
+        tripId={responsesTarget?.id || ""}
+        tripName={responsesTarget?.name || responsesTarget?.plan?.name || "this trip"}
+        days={responsesTarget?.plan?.days || []}
+      />
     </div>
   );
 };

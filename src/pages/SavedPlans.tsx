@@ -194,23 +194,27 @@ const SavedPlans = () => {
                     className="bg-card rounded-xl p-4 border border-border/50 shadow-soft hover:border-primary/40 transition-all"
                   >
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground truncate">
+                          <h3 className="font-semibold text-foreground break-words sm:truncate">
                             {trip.name || trip.plan?.name || `Trip to ${trip.destination}`}
                           </h3>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                            <MapPin className="w-3.5 h-3.5" />
-                            <span>{trip.destination}</span>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1 min-w-0">
+                            <MapPin className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">{trip.destination}</span>
                           </div>
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-2">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+                          <div className="mt-2 grid gap-1.5 text-xs text-muted-foreground sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+                            <span className="flex items-start gap-1 min-w-0">
+                              <Calendar className="w-3 h-3 shrink-0 mt-0.5" />
+                              <span className="min-w-0 break-words">
+                                {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+                              </span>
                             </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {daysCount} days, {activitiesCount} activities
+                            <span className="flex items-start gap-1 min-w-0">
+                              <Clock className="w-3 h-3 shrink-0 mt-0.5" />
+                              <span className="min-w-0 break-words">
+                                {daysCount} days, {activitiesCount} activities
+                              </span>
                             </span>
                           </div>
                         </div>
@@ -219,52 +223,52 @@ const SavedPlans = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => setDeleteTarget(trip)}
-                          className="text-muted-foreground hover:text-destructive shrink-0"
+                          className="text-muted-foreground hover:text-destructive shrink-0 self-end sm:self-auto"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
 
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => copyLink(trip.id)}
-                          className="gap-1 px-2 sm:px-3 text-xs"
+                          className="w-full justify-center gap-1 px-2 text-xs sm:w-auto sm:px-3"
                         >
                           {copiedId === trip.id ? (
                             <Check className="w-3.5 h-3.5 text-green-600" />
                           ) : (
                             <Copy className="w-3.5 h-3.5" />
                           )}
-                          <span className="hidden xs:inline">Share</span>
+                          <span className="hidden sm:inline">Share</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => window.open(`/trip/${trip.id}`, "_blank")}
-                          className="gap-1 px-2 sm:px-3 text-xs"
+                          className="w-full justify-center gap-1 px-2 text-xs sm:w-auto sm:px-3"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          <span className="hidden xs:inline">View</span>
+                          <span className="hidden sm:inline">View</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setInviteTarget(trip)}
-                          className="gap-1 px-2 sm:px-3 text-xs"
+                          className="w-full justify-center gap-1 px-2 text-xs sm:w-auto sm:px-3"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
-                          <span className="hidden xs:inline">Invite</span>
+                          <span className="hidden sm:inline">Invite</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setResponsesTarget(trip)}
-                          className="gap-1 px-2 sm:px-3 text-xs"
+                          className="w-full justify-center gap-1 px-2 text-xs sm:w-auto sm:px-3"
                         >
                           <Users className="w-3.5 h-3.5" />
-                          <span className="hidden xs:inline">Responses</span>
+                          <span className="hidden sm:inline">Responses</span>
                         </Button>
                       </div>
                     </div>

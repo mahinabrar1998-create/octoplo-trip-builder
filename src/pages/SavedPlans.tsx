@@ -225,46 +225,46 @@ const SavedPlans = () => {
                         </Button>
                       </div>
 
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => copyLink(trip.id)}
-                          className="gap-1.5"
+                          className="gap-1 px-2 sm:px-3 text-xs"
                         >
                           {copiedId === trip.id ? (
                             <Check className="w-3.5 h-3.5 text-green-600" />
                           ) : (
                             <Copy className="w-3.5 h-3.5" />
                           )}
-                          Share
+                          <span className="hidden xs:inline">Share</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => window.open(`/trip/${trip.id}`, "_blank")}
-                          className="gap-1.5"
+                          className="gap-1 px-2 sm:px-3 text-xs"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          View
+                          <span className="hidden xs:inline">View</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setInviteTarget(trip)}
-                          className="gap-1.5"
+                          className="gap-1 px-2 sm:px-3 text-xs"
                         >
                           <UserPlus className="w-3.5 h-3.5" />
-                          Invite
+                          <span className="hidden xs:inline">Invite</span>
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setResponsesTarget(trip)}
-                          className="gap-1.5"
+                          className="gap-1 px-2 sm:px-3 text-xs"
                         >
                           <Users className="w-3.5 h-3.5" />
-                          Responses
+                          <span className="hidden xs:inline">Responses</span>
                         </Button>
                       </div>
                     </div>

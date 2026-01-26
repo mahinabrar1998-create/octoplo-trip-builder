@@ -116,13 +116,36 @@ const InviteGuestsDrawer = ({ open, onOpenChange, tripId, tripName }: Props) => 
         return;
       }
 
-      setInvites((prev) => [data as unknown as Invite, ...prev]);
+      const invite = data as unknown as Invite;
+      const inviteUrl = `${window.location.origin}/trip/${tripId}/respond/${invite.invite_token}`;
+
+      // Send email via edge function
+      const { error: emailError } = await supabase.functions.invoke("send-invite-email", {
+        body: {
+          guestName: guestName.trim(),
+          guestEmail: guestEmail.trim(),
+          tripName,
+          inviteUrl,
+        },
+      });
+
+      if (emailError) {
+        console.error("Failed to send email:", emailError);
+        toast({
+          title: "Invite saved",
+          description: "Guest added but email failed to send. You can copy the link manually.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invite sent!",
+          description: `Email sent to ${guestEmail.trim()}`,
+        });
+      }
+
+      setInvites((prev) => [invite, ...prev]);
       setGuestName("");
       setGuestEmail("");
-      toast({
-        title: "Guest invited!",
-        description: "Copy the link to share with them.",
-      });
     } catch (err) {
       console.error("Error inviting guest:", err);
       toast({
@@ -216,9 +239,9 @@ const InviteGuestsDrawer = ({ open, onOpenChange, tripId, tripName }: Props) => 
               {sending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <UserPlus className="w-4 h-4" />
+                <Mail className="w-4 h-4" />
               )}
-              Add Guest
+              Send Invite
             </Button>
           </div>
 

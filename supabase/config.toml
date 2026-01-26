@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.suggest-flights]
 verify_jwt = false
+
+[functions.send-invite-email]
+verify_jwt = false

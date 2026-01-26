@@ -29,10 +29,32 @@ type SavedTrip = {
   start_date: string;
   end_date: string;
   created_at: string;
+  owner_token?: string;
   plan: {
     name: string;
     days: { dayNumber: number; date: string; blocks: { title: string; time: string; endTime: string }[] }[];
   };
+};
+
+// Helper to get owner tokens from localStorage
+const getOwnerTokens = (): Record<string, string> => {
+  try {
+    return JSON.parse(localStorage.getItem("trip_owner_tokens") || "{}");
+  } catch {
+    return {};
+  }
+};
+
+// Helper to check if current user owns a trip
+const isOwnedTrip = (tripId: string): boolean => {
+  const tokens = getOwnerTokens();
+  return !!tokens[tripId];
+};
+
+// Helper to get owner token for a trip
+const getOwnerToken = (tripId: string): string | undefined => {
+  const tokens = getOwnerTokens();
+  return tokens[tripId];
 };
 
 const SavedPlans = () => {
@@ -58,9 +80,20 @@ const SavedPlans = () => {
 
   const fetchTrips = async () => {
     try {
+      // Get trips the user owns (has tokens for)
+      const ownerTokens = getOwnerTokens();
+      const ownedTripIds = Object.keys(ownerTokens);
+      
+      if (ownedTripIds.length === 0) {
+        setTrips([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("published_trips" as never)
         .select("id, name, destination, start_date, end_date, created_at, plan")
+        .in("id", ownedTripIds)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -91,14 +124,31 @@ const SavedPlans = () => {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     
+    const ownerToken = getOwnerToken(deleteTarget.id);
+    if (!ownerToken) {
+      toast({
+        title: "Unauthorized",
+        description: "You don't have permission to delete this trip.",
+        variant: "destructive",
+      });
+      setDeleteTarget(null);
+      return;
+    }
+    
     setDeleting(true);
     try {
-      const { error } = await supabase
-        .from("published_trips" as never)
-        .delete()
-        .eq("id", deleteTarget.id);
+      // Use secure RPC function to verify ownership and delete
+      const { error } = await supabase.rpc("delete_trip_secure", {
+        p_trip_id: deleteTarget.id,
+        p_owner_token: ownerToken,
+      });
 
       if (error) throw error;
+      
+      // Remove from localStorage
+      const tokens = getOwnerTokens();
+      delete tokens[deleteTarget.id];
+      localStorage.setItem("trip_owner_tokens", JSON.stringify(tokens));
       
       setTrips((prev) => prev.filter((t) => t.id !== deleteTarget.id));
       toast({ title: "Trip deleted" });
@@ -107,7 +157,7 @@ const SavedPlans = () => {
       console.error("Error deleting trip:", err);
       toast({
         title: "Error",
-        description: "Failed to delete trip.",
+        description: "Failed to delete trip. You may not have permission.",
         variant: "destructive",
       });
     } finally {

@@ -22,6 +22,7 @@ export type Database = {
           hero_image_url: string | null
           id: string
           name: string | null
+          owner_token: string | null
           plan: Json
           start_date: string
           theme_colors: Json | null
@@ -33,6 +34,7 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           name?: string | null
+          owner_token?: string | null
           plan: Json
           start_date: string
           theme_colors?: Json | null
@@ -44,6 +46,7 @@ export type Database = {
           hero_image_url?: string | null
           id?: string
           name?: string | null
+          owner_token?: string | null
           plan?: Json
           start_date?: string
           theme_colors?: Json | null
@@ -81,6 +84,13 @@ export type Database = {
             columns: ["invite_id"]
             isOneToOne: false
             referencedRelation: "trip_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_block_responses_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "trip_invites_public"
             referencedColumns: ["id"]
           },
         ]
@@ -122,10 +132,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      trip_invites_public: {
+        Row: {
+          created_at: string | null
+          guest_name: string | null
+          id: string | null
+          invite_token: string | null
+          trip_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          invite_token?: string | null
+          trip_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          guest_name?: string | null
+          id?: string | null
+          invite_token?: string | null
+          trip_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_invites_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "published_trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
-      [_ in never]: never
+      delete_trip_secure: {
+        Args: { p_owner_token: string; p_trip_id: string }
+        Returns: boolean
+      }
+      verify_trip_owner: {
+        Args: { owner_token: string; trip_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       guest_response_type: "going" | "maybe" | "not_going"

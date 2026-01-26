@@ -226,12 +226,19 @@ const TripResults = () => {
           hero_image_url: "",
           theme_colors: {} as unknown,
         } as never)
-        .select("id")
+        .select("id, owner_token")
         .single();
 
       if (insertError) throw insertError;
 
-      const tripId = (data as { id: string }).id;
+      const tripId = (data as { id: string; owner_token: string }).id;
+      const ownerToken = (data as { id: string; owner_token: string }).owner_token;
+      
+      // Save owner token to localStorage for ownership verification
+      const existingTokens = JSON.parse(localStorage.getItem("trip_owner_tokens") || "{}");
+      existingTokens[tripId] = ownerToken;
+      localStorage.setItem("trip_owner_tokens", JSON.stringify(existingTokens));
+      
       const url = `${window.location.origin}/trip/${tripId}`;
       setPublishedUrl(url);
       

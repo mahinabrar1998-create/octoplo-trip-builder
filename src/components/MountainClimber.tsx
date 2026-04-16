@@ -14,8 +14,11 @@ const MountainClimber = ({ className, message }: MountainClimberProps) => {
           {/* Plane - left side */}
           <g className="animate-[float_3s_ease-in-out_infinite]" style={{ transformOrigin: '40px 30px' }}>
             <circle cx="40" cy="30" r="18" className="fill-primary/10" />
-            <path d="M32,28 l-3,-2 l-15,-2 l6,3 l-2,3 l-6,2 l17,2 l3,-2 l18,4 l-4,-4 l4,-2 l-18,4 Z" className="fill-primary/55" />
-            <path d="M35,35 L28,42 M45,35 L52,42" className="stroke-primary/50" strokeWidth="2" strokeLinecap="round" />
+            {/* Simplified airplane */}
+            <path d="M25,30 L55,30 M40,22 L48,30 L40,38" className="stroke-primary/60" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <path d="M35,30 L40,25 L40,35 Z" className="fill-primary/50" />
+            {/* Contrails */}
+            <path d="M20,26 L12,24 M20,30 L10,30 M20,34 L12,36" className="stroke-primary/40" strokeWidth="2" strokeLinecap="round" />
           </g>
           
           {/* Globe - center */}

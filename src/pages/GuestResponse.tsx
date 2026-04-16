@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import SoothingGradient from "@/components/SoothingGradient";
+import MountainClimber from "@/components/MountainClimber";
 import { cn } from "@/lib/utils";
 import {
   Loader2,

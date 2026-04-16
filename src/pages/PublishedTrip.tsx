@@ -6,7 +6,7 @@ import {
   MapPin,
   Coins,
   Sparkles,
-  Loader2,
+  
   ChevronDown,
   Sun,
   Cloud,

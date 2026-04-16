@@ -9,23 +9,34 @@ const MountainClimber = ({ className, message }: MountainClimberProps) => {
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
       <div className="relative w-72 h-56">
-        {/* Floating travel icons — bigger */}
-        <svg viewBox="0 0 200 50" className="absolute top-0 left-0 w-full h-14 overflow-visible">
-          <g className="animate-[float_3s_ease-in-out_infinite]">
-            {/* Map pin */}
-            <circle cx="55" cy="22" r="12" className="fill-primary/15" />
-            <path d="M55,13 a6,6 0 1,0 0.01,0 L55,28 Z" className="fill-primary/60" />
-            <circle cx="55" cy="17" r="2.2" className="fill-background" />
+        {/* Floating travel icons — bigger and spread out */}
+        <svg viewBox="0 0 300 60" className="absolute top-0 left-0 w-full h-16 overflow-visible">
+          {/* Plane - left side */}
+          <g className="animate-[float_3s_ease-in-out_infinite]" style={{ transformOrigin: '40px 30px' }}>
+            <circle cx="40" cy="30" r="18" className="fill-primary/10" />
+            <path d="M32,28 l-3,-2 l-15,-2 l6,3 l-2,3 l-6,2 l17,2 l3,-2 l18,4 l-4,-4 l4,-2 l-18,4 Z" className="fill-primary/55" />
+            <path d="M35,35 L28,42 M45,35 L52,42" className="stroke-primary/50" strokeWidth="2" strokeLinecap="round" />
           </g>
-          <g className="animate-[float_3s_ease-in-out_infinite_0.5s]">
-            {/* Plane */}
-            <path d="M110,26 l-6,-3 l-12,0 l5,3 l-5,3 l12,0 Z" className="fill-primary/45" />
+          
+          {/* Globe - center */}
+          <g className="animate-[float_3s_ease-in-out_infinite_0.6s]" style={{ transformOrigin: '150px 25px' }}>
+            <circle cx="150" cy="25" r="20" className="stroke-primary/35 fill-none" strokeWidth="2" />
+            <ellipse cx="150" cy="25" rx="9" ry="20" className="stroke-primary/35 fill-none" strokeWidth="1.5" />
+            <line x1="130" y1="25" x2="170" y2="25" className="stroke-primary/35" strokeWidth="1.5" />
+            <line x1="140" y1="12" x2="140" y2="38" className="stroke-primary/35" strokeWidth="1" />
+            <line x1="160" y1="12" x2="160" y2="38" className="stroke-primary/35" strokeWidth="1" />
           </g>
-          <g className="animate-[float_3s_ease-in-out_infinite_1s]">
-            {/* Globe */}
-            <circle cx="145" cy="18" r="11" className="stroke-primary/40 fill-none" strokeWidth="1.5" />
-            <ellipse cx="145" cy="18" rx="5" ry="11" className="stroke-primary/40 fill-none" strokeWidth="1.2" />
-            <line x1="134" y1="18" x2="156" y2="18" className="stroke-primary/40" strokeWidth="1.2" />
+          
+          {/* Hills/Mountains - right side */}
+          <g className="animate-[float_3s_ease-in-out_infinite_1.2s]" style={{ transformOrigin: '260px 35px' }}>
+            <circle cx="260" cy="35" r="18" className="fill-primary/10" />
+            {/* Three peaks */}
+            <path d="M235,48 L248,22 L261,48 Z" className="fill-primary/45" />
+            <path d="M250,48 L263,18 L276,48 Z" className="fill-primary/55" />
+            <path d="M265,48 L278,26 L291,48 Z" className="fill-primary/40" />
+            {/* Snow caps */}
+            <path d="M251,30 L257,22 L260,28" className="stroke-background/60" strokeWidth="2" strokeLinecap="round" fill="none" />
+            <path d="M266,26 L272,18 L275,24" className="stroke-background/60" strokeWidth="2" strokeLinecap="round" fill="none" />
           </g>
         </svg>
 

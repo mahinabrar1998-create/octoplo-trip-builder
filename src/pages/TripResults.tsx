@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import MountainClimber from "@/components/MountainClimber";
 import { Button } from "@/components/ui/button";
 import {
@@ -213,6 +214,12 @@ const TripResults = () => {
 
   const handleSave = async () => {
     if (!plan || !tripData) return;
+
+    // Require sign-in to save
+    if (!user) {
+      navigate("/auth", { state: { returnTo: "/results" } });
+      return;
+    }
 
     setPublishing(true);
     try {

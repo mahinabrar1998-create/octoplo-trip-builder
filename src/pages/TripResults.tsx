@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import MountainClimber from "@/components/MountainClimber";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -319,44 +320,7 @@ const TripResults = () => {
       <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
         <SoothingGradient />
         <div className="relative z-10 text-center space-y-6 p-8">
-          {/* Fun Hiking Animation */}
-          <div className="relative w-64 h-48 mx-auto">
-            <div className="absolute bottom-8 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent rounded-full" />
-            
-            <div className="absolute bottom-10 animate-[walk_2s_ease-in-out_infinite]">
-              <div className="relative">
-                <div className="absolute -right-1 top-3 w-4 h-6 bg-primary/80 rounded-sm" />
-                <div className="absolute -right-0.5 top-2 w-2 h-2 bg-primary rounded-full" />
-                <div className="w-6 h-6 bg-foreground rounded-full mx-auto" />
-                <div className="w-4 h-8 bg-foreground rounded-sm mx-auto -mt-1" />
-                <div className="flex justify-center gap-1 -mt-1">
-                  <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[leftLeg_0.5s_ease-in-out_infinite]" />
-                  <div className="w-1.5 h-6 bg-foreground rounded-b origin-top animate-[rightLeg_0.5s_ease-in-out_infinite]" />
-                </div>
-              </div>
-            </div>
-            
-            <div className="absolute top-4 left-8 animate-[float_3s_ease-in-out_infinite]">
-              <MapPin className="w-6 h-6 text-primary/60" />
-            </div>
-            <div className="absolute top-8 right-12 animate-[float_3s_ease-in-out_infinite_0.5s]">
-              <Plane className="w-5 h-5 text-primary/50" />
-            </div>
-            <div className="absolute top-2 right-6 animate-[float_3s_ease-in-out_infinite_1s]">
-              <Globe className="w-5 h-5 text-primary/40" />
-            </div>
-            
-            <div className="absolute bottom-8 right-0 flex gap-2">
-              {[...Array(5)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className="w-2 h-2 rounded-full bg-primary/30 animate-pulse"
-                  style={{ animationDelay: `${i * 0.2}s` }}
-                />
-              ))}
-            </div>
-          </div>
-          
+          <MountainClimber />
           <div className="space-y-2">
             <h2 className="text-2xl font-bold text-foreground">
               Crafting your perfect trip...
@@ -366,24 +330,6 @@ const TripResults = () => {
             </p>
           </div>
         </div>
-        <style>{`
-          @keyframes walk {
-            0%, 100% { left: 10%; }
-            50% { left: 45%; }
-          }
-          @keyframes leftLeg {
-            0%, 100% { transform: rotate(-15deg); }
-            50% { transform: rotate(15deg); }
-          }
-          @keyframes rightLeg {
-            0%, 100% { transform: rotate(15deg); }
-            50% { transform: rotate(-15deg); }
-          }
-          @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-          }
-        `}</style>
       </div>
     );
   }

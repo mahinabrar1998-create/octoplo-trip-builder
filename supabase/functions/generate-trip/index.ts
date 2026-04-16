@@ -85,6 +85,54 @@ serve(async (req) => {
     const end = new Date(endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
+    // ============ OPEN-METEO WEATHER: Fetch real forecasts ============
+    let realWeather: any[] = [];
+    
+    try {
+      console.log("Geocoding destination for weather...");
+      const geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(destination)}&count=1&language=en`
+      );
+      const geoData = await geoRes.json();
+      
+      if (geoData.results && geoData.results.length > 0) {
+        const { latitude, longitude } = geoData.results[0];
+        console.log(`Geocoded ${destination} to ${latitude}, ${longitude}`);
+        
+        const weatherRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&start_date=${startDate}&end_date=${endDate}&temperature_unit=fahrenheit&timezone=auto`
+        );
+        const weatherData = await weatherRes.json();
+        
+        if (weatherData.daily) {
+          const weatherCodeMap: Record<number, string> = {
+            0: "sunny", 1: "sunny", 2: "partly-cloudy", 3: "cloudy",
+            45: "cloudy", 48: "cloudy",
+            51: "rainy", 53: "rainy", 55: "rainy",
+            61: "rainy", 63: "rainy", 65: "rainy",
+            71: "snowy", 73: "snowy", 75: "snowy", 77: "snowy",
+            80: "rainy", 81: "rainy", 82: "stormy",
+            85: "snowy", 86: "snowy",
+            95: "stormy", 96: "stormy", 99: "stormy",
+          };
+          
+          realWeather = weatherData.daily.time.map((date: string, i: number) => ({
+            date,
+            highTemp: Math.round(weatherData.daily.temperature_2m_max[i]),
+            lowTemp: Math.round(weatherData.daily.temperature_2m_min[i]),
+            condition: weatherCodeMap[weatherData.daily.weathercode[i]] || "partly-cloudy",
+            code: weatherData.daily.weathercode[i],
+          }));
+          
+          console.log(`Fetched real weather for ${realWeather.length} days`);
+        }
+      } else {
+        console.warn("Could not geocode destination, AI will estimate weather");
+      }
+    } catch (weatherError) {
+      console.warn("Error fetching weather, AI will estimate:", weatherError);
+    }
+
     // ============ FOURSQUARE INTEGRATION: Fetch real places ============
     let realPlaces: any = null;
     const FOURSQUARE_API_KEY = Deno.env.get("FOURSQUARE_API_KEY");
@@ -93,49 +141,35 @@ serve(async (req) => {
       console.log("Fetching real places from Foursquare...");
       
       try {
-        // Fetch restaurants
         const restaurantParams = new URLSearchParams({
           near: destination,
-          categories: "13065,13032,13028", // Restaurants, Cafes, Breakfast
+          categories: "13065,13032,13028",
           limit: "25",
           sort: "RELEVANCE",
           fields: "fsq_id,name,location,categories,rating,price,description",
         });
         
-        const restaurantResponse = await fetch(
-          `https://api.foursquare.com/v3/places/search?${restaurantParams}`,
-          {
-            headers: {
-              Authorization: FOURSQUARE_API_KEY,
-              Accept: "application/json",
-            },
-          }
-        );
-
-        // Fetch attractions
         const attractionParams = new URLSearchParams({
           near: destination,
-          categories: "16000,10027,16032", // Landmarks, Museums, Parks
+          categories: "16000,10027,16032",
           limit: "25",
           sort: "RELEVANCE",
           fields: "fsq_id,name,location,categories,rating,description",
         });
-        
-        const attractionResponse = await fetch(
-          `https://api.foursquare.com/v3/places/search?${attractionParams}`,
-          {
-            headers: {
-              Authorization: FOURSQUARE_API_KEY,
-              Accept: "application/json",
-            },
-          }
-        );
+
+        const [restaurantResponse, attractionResponse] = await Promise.all([
+          fetch(`https://api.foursquare.com/v3/places/search?${restaurantParams}`, {
+            headers: { Authorization: FOURSQUARE_API_KEY, Accept: "application/json" },
+          }),
+          fetch(`https://api.foursquare.com/v3/places/search?${attractionParams}`, {
+            headers: { Authorization: FOURSQUARE_API_KEY, Accept: "application/json" },
+          }),
+        ]);
 
         if (restaurantResponse.ok && attractionResponse.ok) {
           const restaurants = await restaurantResponse.json();
           const attractions = await attractionResponse.json();
           
-          // Format places for the AI prompt
           const formatPlace = (place: any) => {
             const address = place.location?.formatted_address || 
               [place.location?.address, place.location?.locality].filter(Boolean).join(", ");
@@ -144,9 +178,7 @@ serve(async (req) => {
             const price = priceMap[place.price] || "$$";
             
             return {
-              name: place.name,
-              address,
-              category,
+              name: place.name, address, category,
               rating: place.rating ? (place.rating / 2).toFixed(1) : null,
               price,
               neighborhood: place.location?.locality || place.location?.neighborhood || "",
@@ -158,12 +190,10 @@ serve(async (req) => {
             attractions: attractions.results?.map(formatPlace) || [],
           };
           
-          console.log(`Fetched ${realPlaces.restaurants.length} restaurants and ${realPlaces.attractions.length} attractions from Foursquare`);
-        } else {
-          console.warn("Foursquare API returned non-OK status, continuing without real places");
+          console.log(`Fetched ${realPlaces.restaurants.length} restaurants and ${realPlaces.attractions.length} attractions`);
         }
       } catch (fsqError) {
-        console.warn("Error fetching from Foursquare, continuing without real places:", fsqError);
+        console.warn("Error fetching from Foursquare:", fsqError);
       }
     } else {
       console.log("Foursquare API key not configured, using AI-generated places");
@@ -287,6 +317,21 @@ ${realPlaces.attractions.slice(0, 15).map((a: any, i: number) =>
 `;
     }
 
+    // Build real weather context for the AI
+    let realWeatherContext = "";
+    if (realWeather.length > 0) {
+      realWeatherContext = `
+
+## REAL WEATHER FORECAST (from Open-Meteo - USE THESE EXACT VALUES)
+
+${realWeather.map((w, i) => 
+  `- Day ${i + 1} (${w.date}): ${w.condition}, High: ${w.highTemp}°F, Low: ${w.lowTemp}°F`
+).join("\n")}
+
+**CRITICAL**: Use the EXACT weather data above for each day's forecast in the itinerary. Do NOT make up weather. Adjust activity recommendations based on actual conditions (e.g., indoor activities for rainy days).
+`;
+    }
+
     const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.
 
 Trip Details:
@@ -296,13 +341,14 @@ Trip Details:
 - Preferred Vibes: ${vibe.join(', ')}
 ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
 ${realPlacesContext}
+${realWeatherContext}
 
 IMPORTANT Requirements:
 1. **FLIGHT TIMING IS CRITICAL**: 
    - Day 1 activities MUST start AFTER the outbound flight lands (add 1-2 hours for customs/transit)
    - Last day activities MUST end BEFORE the return flight departure (allow 3 hours for airport)
 2. Middle days (not arrival/departure) should have 6-8 detailed time blocks from morning to night
-3. Include realistic weather forecasts based on seasonal patterns for ${destination}
+3. ${realWeather.length > 0 ? "**USE THE EXACT REAL WEATHER DATA PROVIDED ABOVE** for each day's weather forecast" : "Include realistic weather forecasts based on seasonal patterns for " + destination}
 4. Consider traffic patterns (avoid scheduling across town during rush hour)
 5. Include specific transport instructions between each activity
 6. Account for opening hours and peak tourist times

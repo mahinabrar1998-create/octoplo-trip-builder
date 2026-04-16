@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,7 @@ const steps = [
 const BuildTrip = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0); // 0 = trip details, 1-4 = steps
   
   // Trip details
@@ -234,6 +236,12 @@ const BuildTrip = () => {
         description: "Please fill in all required fields.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Require sign-in to save
+    if (!user) {
+      navigate("/auth", { state: { returnTo: "/build" } });
       return;
     }
 

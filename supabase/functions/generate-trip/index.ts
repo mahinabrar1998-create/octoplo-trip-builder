@@ -317,6 +317,21 @@ ${realPlaces.attractions.slice(0, 15).map((a: any, i: number) =>
 `;
     }
 
+    // Build real weather context for the AI
+    let realWeatherContext = "";
+    if (realWeather.length > 0) {
+      realWeatherContext = `
+
+## REAL WEATHER FORECAST (from Open-Meteo - USE THESE EXACT VALUES)
+
+${realWeather.map((w, i) => 
+  `- Day ${i + 1} (${w.date}): ${w.condition}, High: ${w.highTemp}°F, Low: ${w.lowTemp}°F`
+).join("\n")}
+
+**CRITICAL**: Use the EXACT weather data above for each day's forecast in the itinerary. Do NOT make up weather. Adjust activity recommendations based on actual conditions (e.g., indoor activities for rainy days).
+`;
+    }
+
     const userPrompt = `Create a HIGHLY DETAILED ${days}-day trip plan for ${destination}.
 
 Trip Details:
@@ -326,13 +341,14 @@ Trip Details:
 - Preferred Vibes: ${vibe.join(', ')}
 ${specialInstructions ? `- Special Instructions: ${specialInstructions}` : ''}
 ${realPlacesContext}
+${realWeatherContext}
 
 IMPORTANT Requirements:
 1. **FLIGHT TIMING IS CRITICAL**: 
    - Day 1 activities MUST start AFTER the outbound flight lands (add 1-2 hours for customs/transit)
    - Last day activities MUST end BEFORE the return flight departure (allow 3 hours for airport)
 2. Middle days (not arrival/departure) should have 6-8 detailed time blocks from morning to night
-3. Include realistic weather forecasts based on seasonal patterns for ${destination}
+3. ${realWeather.length > 0 ? "**USE THE EXACT REAL WEATHER DATA PROVIDED ABOVE** for each day's weather forecast" : "Include realistic weather forecasts based on seasonal patterns for " + destination}
 4. Consider traffic patterns (avoid scheduling across town during rush hour)
 5. Include specific transport instructions between each activity
 6. Account for opening hours and peak tourist times

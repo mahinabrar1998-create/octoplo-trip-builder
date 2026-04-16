@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import MountainClimber from "@/components/MountainClimber";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,

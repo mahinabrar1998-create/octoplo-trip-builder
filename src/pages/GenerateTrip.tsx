@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -78,6 +79,7 @@ const steps = [
 
 const GenerateTrip = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [tripData, setTripData] = useState<TripData>({
     destination: "",
@@ -411,7 +413,7 @@ const GenerateTrip = () => {
       <SoothingGradient />
       
       {/* Header */}
-      <header className="relative z-10 p-4 md:p-6">
+      <header className="relative z-10 p-4 md:p-6 flex items-center justify-between">
         <Button
           variant="ghost"
           onClick={handleBack}
@@ -420,6 +422,16 @@ const GenerateTrip = () => {
           <ArrowLeft className="h-4 w-4" />
           {currentStep === 1 ? "Back to home" : "Back"}
         </Button>
+        {!authLoading && !user && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/auth", { state: { returnTo: "/generate" } })}
+            className="gap-1.5"
+          >
+            Sign in
+          </Button>
+        )}
       </header>
 
       {/* Progress Indicator */}

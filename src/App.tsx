@@ -11,6 +11,7 @@ import BuildTrip from "./pages/BuildTrip";
 import PublishedTrip from "./pages/PublishedTrip";
 import SavedPlans from "./pages/SavedPlans";
 import GuestResponse from "./pages/GuestResponse";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/generate" element={<GenerateTrip />} />
           <Route path="/results" element={<TripResults />} />
           <Route path="/build" element={<BuildTrip />} />

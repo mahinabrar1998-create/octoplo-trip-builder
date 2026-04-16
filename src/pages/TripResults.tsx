@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import MountainClimber from "@/components/MountainClimber";
 import { Button } from "@/components/ui/button";
 import {
@@ -145,6 +146,7 @@ const TripResults = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [plan, setPlan] = useState<TripPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -213,6 +215,12 @@ const TripResults = () => {
 
   const handleSave = async () => {
     if (!plan || !tripData) return;
+
+    // Require sign-in to save
+    if (!user) {
+      navigate("/auth", { state: { returnTo: "/results" } });
+      return;
+    }
 
     setPublishing(true);
     try {

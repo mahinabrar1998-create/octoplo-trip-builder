@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,6 +62,7 @@ const getOwnerToken = (tripId: string): string | undefined => {
 const SavedPlans = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [trips, setTrips] = useState<SavedTrip[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -76,8 +78,13 @@ const SavedPlans = () => {
   const [responsesTarget, setResponsesTarget] = useState<SavedTrip | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate("/auth", { state: { returnTo: "/saved" } });
+      return;
+    }
     fetchTrips();
-  }, []);
+  }, [authLoading, user]);
 
   const fetchTrips = async () => {
     try {

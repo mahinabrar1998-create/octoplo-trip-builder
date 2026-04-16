@@ -19,7 +19,7 @@ import {
   MapPin,
   Star,
   Clock,
-  DollarSign,
+  
   Pencil,
   Trash2,
   Globe,

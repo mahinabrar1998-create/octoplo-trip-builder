@@ -249,9 +249,8 @@ const GuestResponse = () => {
     return (
       <div className="min-h-screen bg-background relative flex items-center justify-center">
         <SoothingGradient />
-        <div className="relative z-10 text-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground">Loading trip...</p>
+        <div className="relative z-10">
+          <MountainClimber message="Loading trip..." />
         </div>
       </div>
     );

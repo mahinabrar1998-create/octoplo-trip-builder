@@ -190,9 +190,8 @@ const PublishedTrip = () => {
     return (
       <div className="min-h-screen bg-background relative flex items-center justify-center overflow-hidden">
         <SoothingGradient />
-        <div className="relative z-10 text-center space-y-4">
-          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
-          <p className="text-muted-foreground">Loading your trip...</p>
+        <div className="relative z-10">
+          <MountainClimber message="Loading your trip..." />
         </div>
       </div>
     );

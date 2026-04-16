@@ -8,29 +8,29 @@ interface MountainClimberProps {
 const MountainClimber = ({ className, message }: MountainClimberProps) => {
   return (
     <div className={cn("flex flex-col items-center gap-4", className)}>
-      <div className="relative w-64 h-48">
-        {/* Floating travel icons */}
-        <svg viewBox="0 0 200 40" className="absolute top-0 left-0 w-full h-10 overflow-visible">
+      <div className="relative w-72 h-56">
+        {/* Floating travel icons — bigger */}
+        <svg viewBox="0 0 200 50" className="absolute top-0 left-0 w-full h-14 overflow-visible">
           <g className="animate-[float_3s_ease-in-out_infinite]">
             {/* Map pin */}
-            <circle cx="60" cy="18" r="8" className="fill-primary/15" />
-            <path d="M60,12 a4,4 0 1,0 0.01,0 L60,22 Z" className="fill-primary/60" />
-            <circle cx="60" cy="14.5" r="1.5" className="fill-background" />
+            <circle cx="55" cy="22" r="12" className="fill-primary/15" />
+            <path d="M55,13 a6,6 0 1,0 0.01,0 L55,28 Z" className="fill-primary/60" />
+            <circle cx="55" cy="17" r="2.2" className="fill-background" />
           </g>
           <g className="animate-[float_3s_ease-in-out_infinite_0.5s]">
             {/* Plane */}
-            <path d="M120,22 l-4,-2 l-8,0 l3,2 l-3,2 l8,0 Z" className="fill-primary/40" />
+            <path d="M110,26 l-6,-3 l-12,0 l5,3 l-5,3 l12,0 Z" className="fill-primary/45" />
           </g>
           <g className="animate-[float_3s_ease-in-out_infinite_1s]">
             {/* Globe */}
-            <circle cx="140" cy="12" r="7" className="stroke-primary/35 fill-none" strokeWidth="1.2" />
-            <ellipse cx="140" cy="12" rx="3" ry="7" className="stroke-primary/35 fill-none" strokeWidth="1" />
-            <line x1="133" y1="12" x2="147" y2="12" className="stroke-primary/35" strokeWidth="1" />
+            <circle cx="145" cy="18" r="11" className="stroke-primary/40 fill-none" strokeWidth="1.5" />
+            <ellipse cx="145" cy="18" rx="5" ry="11" className="stroke-primary/40 fill-none" strokeWidth="1.2" />
+            <line x1="134" y1="18" x2="156" y2="18" className="stroke-primary/40" strokeWidth="1.2" />
           </g>
         </svg>
 
         {/* Ground + Character scene */}
-        <svg viewBox="0 0 200 100" className="absolute bottom-0 left-0 w-full h-32 overflow-visible">
+        <svg viewBox="0 0 200 100" className="absolute bottom-0 left-0 w-full h-36 overflow-visible">
           {/* Ground line */}
           <line x1="20" y1="82" x2="180" y2="82"
             className="stroke-primary/20" strokeWidth="1.5" strokeLinecap="round" />
@@ -46,52 +46,65 @@ const MountainClimber = ({ className, message }: MountainClimberProps) => {
             />
           ))}
 
-          {/* Walker group — slides left to right */}
-          <g className="animate-[walk_3s_ease-in-out_infinite]">
+          {/* Walker group */}
+          <g className="animate-[walk_4s_ease-in-out_infinite]">
             {/* Shadow */}
             <ellipse cx="80" cy="83" rx="10" ry="2" className="fill-foreground/10" />
 
             {/* Left leg */}
-            <rect x="75" y="63" width="4.5" height="18" rx="2"
-              className="fill-foreground origin-top animate-[leftLeg_0.6s_ease-in-out_infinite]"
-              style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
+            <g style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }}
+               className="animate-[leftLeg_0.8s_ease-in-out_infinite]">
+              <rect x="75" y="63" width="4.5" height="16" rx="2" className="fill-foreground" />
+              {/* Left shin */}
+              <g style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }}
+                 className="animate-[leftShin_0.8s_ease-in-out_infinite]">
+                <rect x="75" y="76" width="4.5" height="5" rx="2" className="fill-foreground/90" />
+                <rect x="73" y="79" width="7" height="3.5" rx="1.5" className="fill-foreground/80" />
+              </g>
+            </g>
+
             {/* Right leg */}
-            <rect x="80" y="63" width="4.5" height="18" rx="2"
-              className="fill-foreground origin-top animate-[rightLeg_0.6s_ease-in-out_infinite]"
-              style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
+            <g style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }}
+               className="animate-[rightLeg_0.8s_ease-in-out_infinite]">
+              <rect x="80" y="63" width="4.5" height="16" rx="2" className="fill-foreground" />
+              {/* Right shin */}
+              <g style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }}
+                 className="animate-[rightShin_0.8s_ease-in-out_infinite]">
+                <rect x="80" y="76" width="4.5" height="5" rx="2" className="fill-foreground/90" />
+                <rect x="79" y="79" width="7" height="3.5" rx="1.5" className="fill-foreground/80" />
+              </g>
+            </g>
 
-            {/* Shoes */}
-            <rect x="73" y="78" width="7" height="3.5" rx="1.5"
-              className="fill-foreground/80 origin-top animate-[leftLeg_0.6s_ease-in-out_infinite]"
-              style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
-            <rect x="79" y="78" width="7" height="3.5" rx="1.5"
-              className="fill-foreground/80 origin-top animate-[rightLeg_0.6s_ease-in-out_infinite]"
-              style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
+            {/* Torso with slight bob */}
+            <g className="animate-[torso_0.4s_ease-in-out_infinite]">
+              <rect x="73" y="42" width="14" height="23" rx="4" className="fill-foreground" />
 
-            {/* Torso */}
-            <rect x="73" y="42" width="14" height="23" rx="4" className="fill-foreground" />
+              {/* Backpack */}
+              <rect x="68" y="44" width="8" height="16" rx="3" className="fill-primary" />
+              <rect x="69" y="46" width="6" height="4" rx="1.5" className="fill-primary/70" />
+              <line x1="76" y1="46" x2="73" y2="50" className="stroke-primary/80" strokeWidth="1.2" />
 
-            {/* Backpack */}
-            <rect x="68" y="44" width="8" height="16" rx="3" className="fill-primary" />
-            <rect x="69" y="46" width="6" height="4" rx="1.5" className="fill-primary/70" />
-            {/* Backpack strap */}
-            <line x1="76" y1="46" x2="73" y2="50" className="stroke-primary/80" strokeWidth="1.2" />
+              {/* Left arm */}
+              <g style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }}
+                 className="animate-[leftArm_0.8s_ease-in-out_infinite]">
+                <rect x="68" y="46" width="4" height="10" rx="2" className="fill-foreground" />
+                <rect x="68" y="54" width="4" height="6" rx="2" className="fill-foreground/90 animate-[leftForearm_0.8s_ease-in-out_infinite]"
+                  style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
+              </g>
+              {/* Right arm */}
+              <g style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }}
+                 className="animate-[rightArm_0.8s_ease-in-out_infinite]">
+                <rect x="88" y="46" width="4" height="10" rx="2" className="fill-foreground" />
+                <rect x="88" y="54" width="4" height="6" rx="2" className="fill-foreground/90 animate-[rightForearm_0.8s_ease-in-out_infinite]"
+                  style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
+              </g>
 
-            {/* Left arm */}
-            <rect x="68" y="46" width="4" height="14" rx="2"
-              className="fill-foreground origin-top animate-[leftArm_0.6s_ease-in-out_infinite]"
-              style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
-            {/* Right arm */}
-            <rect x="88" y="46" width="4" height="14" rx="2"
-              className="fill-foreground origin-top animate-[rightArm_0.6s_ease-in-out_infinite]"
-              style={{ transformBox: 'fill-box', transformOrigin: '50% 0%' }} />
-
-            {/* Head */}
-            <circle cx="80" cy="34" r="9" className="fill-foreground" />
-            {/* Hair / cap */}
-            <path d="M71,32 Q75,24 85,28 Q89,30 89,33 Z" className="fill-primary" />
-            {/* Cap brim */}
-            <rect x="82" y="31" width="9" height="2.5" rx="1" className="fill-primary/80" />
+              {/* Head */}
+              <circle cx="80" cy="34" r="9" className="fill-foreground" />
+              {/* Hair / cap */}
+              <path d="M71,32 Q75,24 85,28 Q89,30 89,33 Z" className="fill-primary" />
+              <rect x="82" y="31" width="9" height="2.5" rx="1" className="fill-primary/80" />
+            </g>
           </g>
         </svg>
       </div>
@@ -105,21 +118,49 @@ const MountainClimber = ({ className, message }: MountainClimberProps) => {
           0%, 100% { transform: translateX(-15px); }
           50% { transform: translateX(15px); }
         }
+        @keyframes torso {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-1.2px); }
+        }
         @keyframes leftLeg {
-          0%, 100% { transform: rotate(-12deg); }
-          50% { transform: rotate(12deg); }
+          0% { transform: rotate(-15deg); }
+          50% { transform: rotate(15deg); }
+          100% { transform: rotate(-15deg); }
         }
         @keyframes rightLeg {
-          0%, 100% { transform: rotate(12deg); }
-          50% { transform: rotate(-12deg); }
+          0% { transform: rotate(15deg); }
+          50% { transform: rotate(-15deg); }
+          100% { transform: rotate(15deg); }
+        }
+        @keyframes leftShin {
+          0% { transform: rotate(8deg); }
+          25% { transform: rotate(-5deg); }
+          50% { transform: rotate(0deg); }
+          75% { transform: rotate(12deg); }
+          100% { transform: rotate(8deg); }
+        }
+        @keyframes rightShin {
+          0% { transform: rotate(0deg); }
+          25% { transform: rotate(12deg); }
+          50% { transform: rotate(8deg); }
+          75% { transform: rotate(-5deg); }
+          100% { transform: rotate(0deg); }
         }
         @keyframes leftArm {
-          0%, 100% { transform: rotate(12deg); }
-          50% { transform: rotate(-12deg); }
+          0%, 100% { transform: rotate(18deg); }
+          50% { transform: rotate(-18deg); }
         }
         @keyframes rightArm {
-          0%, 100% { transform: rotate(-12deg); }
-          50% { transform: rotate(12deg); }
+          0%, 100% { transform: rotate(-18deg); }
+          50% { transform: rotate(18deg); }
+        }
+        @keyframes leftForearm {
+          0%, 100% { transform: rotate(-10deg); }
+          50% { transform: rotate(15deg); }
+        }
+        @keyframes rightForearm {
+          0%, 100% { transform: rotate(15deg); }
+          50% { transform: rotate(-10deg); }
         }
         @keyframes float {
           0%, 100% { transform: translateY(0); }

@@ -29,6 +29,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import SoothingGradient from "@/components/SoothingGradient";
+import MountainClimber from "@/components/MountainClimber";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 

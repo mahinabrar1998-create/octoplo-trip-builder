@@ -11,7 +11,7 @@ import {
   Calendar,
   Clock,
   MapPin,
-  DollarSign,
+  Coins,
   Sparkles,
   Loader2,
   ChevronDown,
@@ -462,7 +462,7 @@ const TripResults = () => {
                 const cleanCost = cost.startsWith('$') ? cost.substring(1).trim() : cost;
                 return (
                   <>
-                    <DollarSign className="w-3 h-3" />
+                    <Coins className="w-3 h-3" />
                     {cleanCost}
                   </>
                 );
@@ -713,7 +713,7 @@ const TripResults = () => {
                                 <span>{block.location}</span>
                               </span>
                               <span className="flex items-center gap-1">
-                                {isFree && <DollarSign className="w-3 h-3" />}
+                                {isFree && <Coins className="w-3 h-3" />}
                                 {formattedCost}
                               </span>
                             </div>

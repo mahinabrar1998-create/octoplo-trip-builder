@@ -12,7 +12,7 @@ import {
   ArrowRight, 
   MapPin, 
   CalendarIcon, 
-  DollarSign, 
+  Coins, 
   Users, 
   Sparkles, 
   MessageSquare,
@@ -70,7 +70,7 @@ const groupSizeOptions: { id: string; label: string; Icon: LucideIcon }[] = [
 const steps = [
   { id: 1, title: "Destination", icon: MapPin },
   { id: 2, title: "Dates", icon: CalendarIcon },
-  { id: 3, title: "Budget", icon: DollarSign },
+  { id: 3, title: "Budget", icon: Coins },
   { id: 4, title: "Group Size", icon: Users },
   { id: 5, title: "Vibe", icon: Sparkles },
   { id: 6, title: "Special Instructions", icon: MessageSquare },

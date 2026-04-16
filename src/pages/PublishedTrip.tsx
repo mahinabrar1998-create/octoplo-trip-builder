@@ -4,7 +4,7 @@ import {
   Calendar,
   Clock,
   MapPin,
-  DollarSign,
+  Coins,
   Sparkles,
   Loader2,
   ChevronDown,
@@ -265,7 +265,7 @@ const PublishedTrip = () => {
                 const cleanCost = cost.startsWith('$') ? cost.substring(1).trim() : cost;
                 return (
                   <>
-                    <DollarSign className="w-3 h-3" />
+                    <Coins className="w-3 h-3" />
                     {cleanCost}
                   </>
                 );
